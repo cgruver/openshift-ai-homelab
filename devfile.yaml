@@ -1,0 +1,48 @@
+schemaVersion: 2.2.0
+metadata:
+  name: openshift-ai-homelab-xaim
+components:
+- name: workspace-tools
+  container:
+    image: 'nexus.clg.lab:5002/dev-spaces/workspace-base:latest'
+    mountSources: true
+    memoryRequest: 1Gi
+    memoryLimit: 16Gi
+    cpuRequest: 100m
+    cpuLimit: 4000m
+    env:
+    - name: SHELL
+      value: "/bin/zsh"
+    - name: HOME
+      value: "/projects/home"
+    - name: VSCODE_DEFAULT_WORKSPACE
+      value: "$(PROJECT_SOURCE)/workspace.code-workspace"
+- volume:
+    size: 50Gi
+  name: projects
+- name: prep-workspace
+  container:
+    args:
+      - '-c'
+      - >-
+        mkdir -p /projects/bin && cp /usr/bin/oc /projects/bin/oc && cp /usr/bin/kubectl /projects/bin/kubectl && if [[ -f ${HOME}/.kube/config ]]; then rm ${HOME}/.kube/config; fi
+    command:
+      - /bin/bash
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    mountSources: true
+    sourceMapping: /projects
+    memoryRequest: 128Mi
+    memoryLimit: 256Mi
+    cpuRequest: 10m
+    cpuLimit: 200m
+    env:
+    - name: HOME
+      value: "/projects/home"
+commands:
+- apply:
+    component: prep-workspace
+    label: Pre Start Prep
+  id: prep-workspace
+events:
+  preStart:
+    - prep-workspace
