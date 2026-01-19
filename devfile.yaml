@@ -1,6 +1,6 @@
 schemaVersion: 2.2.0
 metadata:
-  name: openshift-ai-homelab-xaim
+  name: openshift-ai-homelab
 components:
 - name: workspace-tools
   container:
