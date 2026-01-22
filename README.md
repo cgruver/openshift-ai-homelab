@@ -92,52 +92,8 @@ spec:
     configData: |
       core:
         sleepInterval: 60s
-      sources:
-        cpu:
-          cpuid:
-            attributeBlacklist:
-              - "BMI1"
-              - "BMI2"
-              - "CLMUL"
-              - "CMOV"
-              - "CX16"
-              - "ERMS"
-              - "F16C"
-              - "HTT"
-              - "LZCNT"
-              - "MMX"
-              - "MMXEXT"
-              - "NX"
-              - "POPCNT"
-              - "RDRAND"
-              - "RDSEED"
-              - "RDTSCP"
-              - "SGX"
-              - "SSE"
-              - "SSE2"
-              - "SSE3"
-              - "SSE4.1"
-              - "SSE4.2"
-              - "SSSE3"
-            attributeWhitelist:
-        kernel:
-          kconfigFile: "/path/to/kconfig"
-          configOpts:
-            - "NO_HZ"
-            - "X86"
-            - "DMI"
-        pci:
-          deviceClassWhitelist:
-            - "0200"
-            - "03"
-            - "12"
-          deviceLabelFields:
-            - "class"
-  customConfig:
-    configData: |
-          - name: "more.kernel.features"
-            matchOn:
-            - loadedKMod: ["example_kmod3"]
+        labelSources:
+        - "local"
 ```
 
 ## Intel Node Feature Rules
@@ -147,8 +103,48 @@ oc apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deploy
 ```
 
 ## Service Mesh 3
+
+
+
 ## OpenShift Serverless
 ## Intel Device Plugins
+
+```yaml
+apiVersion: operators.coreos.com/v1alpha2
+kind: OperatorGroup
+metadata:
+  name: global-operators
+  namespace: openshift-operators
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/intel-device-plugins-operator.openshiftoperators: ""
+  name: intel-device-plugins-operator
+  namespace: openshift-operators
+spec:
+  channel: alpha
+  installPlanApproval: Automatic
+  name: intel-device-plugins-operator
+  source: certified-operators
+  sourceNamespace: openshift-marketplace
+```
+
+```yaml
+apiVersion: deviceplugin.intel.com/v1
+kind: GpuDevicePlugin
+metadata:
+  name: gpudeviceplugin
+spec:
+  image: registry.connect.redhat.com/intel/intel-gpu-plugin:0.32.1
+  preferredAllocationPolicy: none
+  sharedDevNum: 1
+  logLevel: 4
+  nodeSelector:
+    intel.feature.node.kubernetes.io/gpu: "true"
+```
+
 ## OpenShift AI
 
 ```yaml
@@ -173,6 +169,43 @@ spec:
   channel: fast-3.x
   source: redhat-operators
   sourceNamespace: openshift-marketplace 
+```
+
+```yaml
+apiVersion: datasciencecluster.opendatahub.io/v2
+kind: DataScienceCluster
+metadata:
+  name: clg-lab-dsc
+spec:
+  components:
+    aipipelines:
+      argoWorkflowsControllers:
+        managementState: Removed 
+      managementState: Removed
+    dashboard:
+      managementState: Removed
+    feastoperator:
+      managementState: Removed
+    kserve:
+      managementState: Managed
+    kueue:
+      defaultClusterQueueName: default
+      defaultLocalQueueName: default
+      managementState: Removed
+    llamastackoperator:
+      managementState: Removed
+    modelregistry:
+      managementState: Removed
+      registriesNamespace: rhoai-model-registries
+    ray:
+      managementState: Removed
+    trainingoperator:
+      managementState: Removed
+    trustyai:
+      managementState: Removed
+    workbenches:
+      managementState: Managed
+      workbenchNamespace: rhods-notebooks 
 ```
 
 
