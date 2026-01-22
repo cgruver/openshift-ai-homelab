@@ -6,8 +6,8 @@ Install the following Operators -
 
 * Cert Manager
 * Node Feature Discovery
-* OpenShift Serverless
-* Service Mesh 3
+* OpenShift Leader Worker Set
+* Red Hat Connectivity Link
 * Intel Device Plugins
 * OpenShift AI
 
