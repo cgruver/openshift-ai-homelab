@@ -102,11 +102,6 @@ spec:
 oc apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=release-0.32' -n openshift-nfd
 ```
 
-## Service Mesh 3
-
-
-
-## OpenShift Serverless
 ## Intel Device Plugins
 
 ```yaml
@@ -267,7 +262,7 @@ metadata:
 spec:
   predictor:
     model:
-      runtime: kserve-openvino
+      runtime: kserve-ovms
       modelFormat:
         name: huggingface
       args:
@@ -279,11 +274,13 @@ spec:
         - --target_device=CPU
       resources:
         requests:
-          cpu: "16"
-          memory: "8G"
+          cpu: "100m"
+          memory: "16Gi"
+          gpu.intel.com/i915: "1"
         limits:
-          cpu: "16"
-          memory: "8G"
+          cpu: "1"
+          memory: "32Gi"
+          gpu.intel.com/i915: "1"
 ```
 
 ```bash
@@ -294,5 +291,6 @@ mkdir models
 
 ```bash
 python export_model.py text_generation --source_model Qwen/Qwen3-Coder-30B-A3B-Instruct --weight-format int4 --config_file_path models/config_all.json --model_repository_path models --target_device GPU --tool_parser qwen3coder --overwrite_models
+
 curl -L -o models/Qwen/Qwen3-Coder-30B-A3B-Instruct/chat_template.jinja https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/extras/chat_template_examples/chat_template_qwen3coder_instruct.jinja
 ```
