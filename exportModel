@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-PY_ARGS="$@"
-echo ${PY_ARGS}
-
-python3 /usr/bin/export_model.py ${PY_ARGS}

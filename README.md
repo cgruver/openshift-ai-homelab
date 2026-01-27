@@ -343,11 +343,22 @@ mkdir models
 ```
 
 ```bash
-exportModel text_generation --source_model Qwen/Qwen3-Coder-30B-A3B-Instruct --weight-format int4 --config_file_path models/1/config_all.json --model_repository_path models/1 --target_device GPU --tool_parser qwen3coder --overwrite_models
-
-curl -L -o models/Qwen/Qwen3-Coder-30B-A3B-Instruct/chat_template.jinja https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/extras/chat_template_examples/chat_template_qwen3coder_instruct.jinja
+mkdir -p model-image/models/1
+cat << EOF > model-image/Containerfile
+FROM registry.access.redhat.com/ubi10/ubi-micro:latest
+COPY --chown=0:0 models /models
+RUN chmod -R a=rX /models
+USER 65534
+EOF
 ```
 
 ```bash
-podman build -t nexus.clg.lab:5002/openvino/qwen3-coder:30b ./qwen3-coder
+exportModel text_generation --source_model Qwen/Qwen3-Coder-30B-A3B-Instruct --weight-format int4 --config_file_path model-image/models/1/config_all.json --model_repository_path model-image/models/1 --target_device GPU --tool_parser qwen3coder --overwrite_models
+
+curl -L -o model-image/models/1/Qwen/Qwen3-Coder-30B-A3B-Instruct/chat_template.jinja https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/extras/chat_template_examples/chat_template_qwen3coder_instruct.jinja
+```
+
+```bash
+podman build -t nexus.clg.lab:5002/openvino/qwen3-coder:30b ./model-image
+podman push nexus.clg.lab:5002/openvino/qwen3-coder:30b
 ```
