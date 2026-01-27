@@ -18,7 +18,7 @@ components:
     - name: VSCODE_DEFAULT_WORKSPACE
       value: "$(PROJECT_SOURCE)/workspace.code-workspace"
 - volume:
-    size: 50Gi
+    size: 100Gi
   name: projects
 - name: prep-workspace
   container:
