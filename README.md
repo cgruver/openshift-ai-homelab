@@ -253,6 +253,59 @@ spec:
       workbenchNamespace: rhods-notebooks 
 ```
 
+```yaml
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  annotations:
+    opendatahub.io/recommended-accelerators: '["gpu.intel.com/i915"]'
+    opendatahub.io/runtime-version: v2025.3
+    openshift.io/display-name: OpenVINO Model Server - Intel ARC
+    opendatahub.io/apiProtocol: REST
+  labels:
+    opendatahub.io/dashboard: "true"
+  name: kserve-ovms-intel
+spec:
+  annotations:
+    opendatahub.io/kserve-runtime: ovms
+    prometheus.io/path: /metrics
+    prometheus.io/port: "8888"
+  containers:
+    - args:
+        - --model_name={{.Name}}
+        - --port=8001
+        - --rest_port=8888
+        - --model_path=/mnt/models
+        - --file_system_poll_wait_seconds=0
+        - --metrics_enable
+      image: registry.redhat.io/rhoai/odh-openvino-model-server-rhel9@sha256:7daebf4a4205b9b81293932a1dfec705f59a83de8097e468e875088996c1f224
+      name: kserve-container
+      ports:
+        - containerPort: 8888
+          protocol: TCP
+  multiModel: false
+  protocolVersions:
+    - v2
+    - grpc-v2
+  supportedModelFormats:
+    - autoSelect: true
+      name: openvino_ir
+      version: opset13
+    - name: onnx
+      version: "1"
+    - autoSelect: true
+      name: tensorflow
+      version: "1"
+    - autoSelect: true
+      name: tensorflow
+      version: "2"
+    - autoSelect: true
+      name: paddle
+      version: "2"
+    - autoSelect: true
+      name: pytorch
+      version: "2"
+```
 
 ```yaml
 apiVersion: serving.kserve.io/v1beta1
@@ -262,7 +315,7 @@ metadata:
 spec:
   predictor:
     model:
-      runtime: kserve-ovms
+      runtime: kserve-ovms-intel
       modelFormat:
         name: huggingface
       args:
@@ -271,7 +324,7 @@ spec:
         - --task=text_generation
         - --enable_prefix_caching=true
         - --tool_parser=hermes3 
-        - --target_device=CPU
+        - --target_device=GPU
       resources:
         requests:
           cpu: "100m"
@@ -290,7 +343,11 @@ mkdir models
 ```
 
 ```bash
-python export_model.py text_generation --source_model Qwen/Qwen3-Coder-30B-A3B-Instruct --weight-format int4 --config_file_path models/config_all.json --model_repository_path models --target_device GPU --tool_parser qwen3coder --overwrite_models
+exportModel text_generation --source_model Qwen/Qwen3-Coder-30B-A3B-Instruct --weight-format int4 --config_file_path models/1/config_all.json --model_repository_path models/1 --target_device GPU --tool_parser qwen3coder --overwrite_models
 
 curl -L -o models/Qwen/Qwen3-Coder-30B-A3B-Instruct/chat_template.jinja https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/extras/chat_template_examples/chat_template_qwen3coder_instruct.jinja
+```
+
+```bash
+podman build -t nexus.clg.lab:5002/openvino/qwen3-coder:30b ./qwen3-coder
 ```

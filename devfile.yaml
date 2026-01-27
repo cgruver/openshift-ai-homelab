@@ -4,10 +4,10 @@ metadata:
 components:
 - name: workspace-tools
   container:
-    image: 'nexus.clg.lab:5002/dev-spaces/workspace-base:latest'
+    image: 'nexus.clg.lab:5002/dev-spaces/ai-home-lab:latest'
     mountSources: true
     memoryRequest: 1Gi
-    memoryLimit: 16Gi
+    memoryLimit: 48Gi
     cpuRequest: 100m
     cpuLimit: 4000m
     env:
