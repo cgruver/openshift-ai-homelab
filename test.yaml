@@ -1,0 +1,133 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  annotations:
+    openshift.io/scc: restricted-v2
+    security.openshift.io/validated-scc-subject-type: user
+  name: qwen3-coder-30b-a3b-instruct-predictor
+  namespace: ai-test
+  labels:
+    app: isvc.qwen3-coder-30b-a3b-instruct-predictor
+    component: predictor
+spec:
+  restartPolicy: Always
+  initContainers:
+    - name: modelcar-init
+      image: 'nexus.clg.lab:5002/openvino/qwen3-coder:latest'
+      args:
+        - sh
+        - '-c'
+        - 'echo ''Pre-fetching modelcar nexus.clg.lab:5002/openvino/qwen3-coder:latest: '' && [ -d /models ] && [ "$$(ls -A /models)" ] && echo ''OK ... Prefetched and valid (/models exists)'' || (echo ''NOK ... Prefetched but modelcar is invalid (/models does not exist or is empty)'' && exit 1)'
+      resources:
+        limits:
+          cpu: 10m
+          memory: 15Mi
+        requests:
+          cpu: 10m
+          memory: 15Mi
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: FallbackToLogsOnError
+      imagePullPolicy: Always
+      securityContext:
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+  serviceAccountName: default
+  imagePullSecrets:
+    - name: default-dockercfg-lqrtm
+  priority: 0
+  schedulerName: default-scheduler
+  enableServiceLinks: true
+  terminationGracePeriodSeconds: 30
+  shareProcessNamespace: true
+  preemptionPolicy: PreemptLowerPriority
+  nodeName: region-03-cp-0
+  securityContext:
+    seLinuxOptions:
+      level: 's0:c30,c20'
+    fsGroup: 1000910000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - resources:
+        limits:
+          cpu: '1'
+          gpu.intel.com/i915: '1'
+          memory: 32Gi
+        requests:
+          cpu: 100m
+          gpu.intel.com/i915: '1'
+          memory: 16Gi
+      readinessProbe:
+        tcpSocket:
+          port: 8888
+        timeoutSeconds: 1
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 3
+      terminationMessagePath: /dev/termination-log
+      name: kserve-container
+      env:
+        - name: MODEL_INIT_MODE
+          value: async
+      securityContext:
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+      ports:
+        - containerPort: 8888
+          protocol: TCP
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - name: kserve-provision-location
+          mountPath: /mnt
+      terminationMessagePolicy: File
+      image: 'nexus.clg.lab:5002/openvino/model_server:2025.4.1-gpu'
+      command: ["tail", "-f", "/dev/null"]
+    - resources:
+        limits:
+          cpu: 10m
+          memory: 15Mi
+        requests:
+          cpu: 10m
+          memory: 15Mi
+      terminationMessagePath: /dev/termination-log
+      name: modelcar
+      securityContext:
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+      imagePullPolicy: Always
+      volumeMounts:
+        - name: kserve-provision-location
+          mountPath: /mnt
+      terminationMessagePolicy: FallbackToLogsOnError
+      image: 'nexus.clg.lab:5002/openvino/qwen3-coder:latest'
+      args:
+        - sh
+        - '-c'
+        - ln -sf /proc/$$$$/root/models /mnt/models && sleep infinity
+  automountServiceAccountToken: false
+  serviceAccount: default
+  volumes:
+    - name: kserve-provision-location
+      emptyDir: {}
+  dnsPolicy: ClusterFirst
+  tolerations:
+    - key: node.kubernetes.io/not-ready
+      operator: Exists
+      effect: NoExecute
+      tolerationSeconds: 300
+    - key: node.kubernetes.io/unreachable
+      operator: Exists
+      effect: NoExecute
+      tolerationSeconds: 300
+    - key: node.kubernetes.io/memory-pressure
+      operator: Exists
+      effect: NoSchedule

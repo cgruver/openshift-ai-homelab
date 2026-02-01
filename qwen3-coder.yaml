@@ -15,11 +15,8 @@ spec:
     prometheus.io/path: /metrics
     prometheus.io/port: "8888"
   containers:
-    - args:
-        - --model_path=/mnt/models
-        - --file_system_poll_wait_seconds=0
-        - --metrics_enable
-      image: registry.redhat.io/rhoai/odh-openvino-model-server-rhel9@sha256:7daebf4a4205b9b81293932a1dfec705f59a83de8097e468e875088996c1f224
+    - # image: registry.redhat.io/rhoai/odh-openvino-model-server-rhel9@sha256:7daebf4a4205b9b81293932a1dfec705f59a83de8097e468e875088996c1f224
+      image: nexus.clg.lab:5002/openvino/model_server:2025.4.1-gpu
       name: kserve-container
       ports:
         - containerPort: 8888
@@ -31,7 +28,6 @@ spec:
   supportedModelFormats:
     - autoSelect: true
       name: openvino_ir
-      version: opset13
 
 ---
 
@@ -45,14 +41,10 @@ spec:
       runtime: kserve-ovms-intel
       modelFormat:
         name: openvino_ir
-      storageUri: nexus.clg.lab:5002/openvino/qwen3-coder:30b
+      storageUri: oci://nexus.clg.lab:5002/openvino/qwen3-coder:latest
       args:
-        - --model_name=qwen3-coder-30b-a3b-instruct
-        - --model_repository_path=/tmp
-        - --task=text_generation
-        - --enable_prefix_caching=true
-        - --tool_parser=qwen3coder 
-        - --target_device=GPU
+        - --config_path=/mnt/models/config_all.json
+        - --log_level=DEBUG
         - --port=8001
         - --rest_port=8888
       resources:
