@@ -279,3 +279,11 @@ curl -L -o model-image/models/Qwen/Qwen3-Coder-30B-A3B-Instruct/1/chat_template.
 podman build -t nexus.clg.lab:5002/openvino/qwen3-coder:latest --squash-all ./model-image
 podman push nexus.clg.lab:5002/openvino/qwen3-coder:latest
 ```
+
+```bash
+curl http://qwen3-coder-30b-a3b-instruct-predictor-ai-test.apps.region-03.clg.lab/v3/chat/completions -H "Content-Type: application/json" -d '{"model":"Qwen/Qwen3-Coder-30B-A3B-Instruct","messages":[{"role":"system","content":"You are a helpful assistant."},{"role":"user","content":"write a poem about roses"}],"stream":false}'
+```
+
+```bash
+curl http://qwen3-coder-30b-a3b-instruct-predictor-ai-test.apps.region-03.clg.lab/v3/models
+```
