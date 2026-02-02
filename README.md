@@ -283,6 +283,7 @@ podman push nexus.clg.lab:5002/openvino/qwen3-coder:latest
 ```bash
 oc new-project ai-test
 oc apply -f qwen3-coder.yaml
+# expose as HTTP for now.  Need to set up MaaS
 oc expose service qwen3-coder-30b-a3b-instruct-predictor
 ```
 
