@@ -86,7 +86,7 @@ spec:
   instance: ""
   topologyupdater: false
   operand:
-    image: registry.redhat.io/openshift4/ose-node-feature-discovery-rhel9:v4.20 
+    image: registry.redhat.io/openshift4/ose-node-feature-discovery-rhel9:v4.21
     imagePullPolicy: Always
   workerConfig:
     configData: |
@@ -99,7 +99,7 @@ spec:
 ## Intel Node Feature Rules
 
 ```bash
-oc apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=release-0.32' -n openshift-nfd
+oc apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=release-0.34' -n openshift-nfd
 ```
 
 ## Intel Device Plugins
@@ -126,7 +126,7 @@ kind: GpuDevicePlugin
 metadata:
   name: gpudeviceplugin
 spec:
-  image: registry.connect.redhat.com/intel/intel-gpu-plugin:0.32.1
+  image: registry.connect.redhat.com/intel/intel-gpu-plugin:0.34.1
   preferredAllocationPolicy: none
   sharedDevNum: 1
   logLevel: 4
@@ -228,7 +228,7 @@ spec:
         managementState: Removed 
       managementState: Removed
     dashboard:
-      managementState: Managed
+      managementState: Removed
     feastoperator:
       managementState: Removed
     kserve:
