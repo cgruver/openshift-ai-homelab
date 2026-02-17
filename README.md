@@ -84,9 +84,9 @@ metadata:
   namespace: openshift-nfd
 spec:
   instance: ""
-  topologyupdater: false
+  topologyUpdater: false
   operand:
-    image: registry.redhat.io/openshift4/ose-node-feature-discovery-rhel9:v4.21
+    image: registry.redhat.io/openshift4/ose-node-feature-discovery-rhel9:v4.20
     imagePullPolicy: Always
   workerConfig:
     configData: |
@@ -99,7 +99,7 @@ spec:
 ## Intel Node Feature Rules
 
 ```bash
-oc apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=release-0.34' -n openshift-nfd
+oc apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=release-0.32' -n openshift-nfd
 ```
 
 ## Intel Device Plugins
@@ -126,7 +126,7 @@ kind: GpuDevicePlugin
 metadata:
   name: gpudeviceplugin
 spec:
-  image: registry.connect.redhat.com/intel/intel-gpu-plugin:0.34.1
+  image: registry.connect.redhat.com/intel/intel-gpu-plugin:0.32.1
   preferredAllocationPolicy: none
   sharedDevNum: 1
   logLevel: 4
@@ -285,6 +285,7 @@ oc new-project ai-test
 oc apply -f qwen3-coder.yaml
 # expose as HTTP for now.  Need to set up MaaS
 oc expose service qwen3-coder-30b-a3b-instruct-predictor
+oc annotate route qwen3-coder-30b-a3b-instruct-predictor haproxy.router.openshift.io/timeout=600s
 ```
 
 ```bash
