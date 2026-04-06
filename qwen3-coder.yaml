@@ -43,6 +43,14 @@ metadata:
     # sidecar.istio.io/rewriteAppHTTPProbers: "true"
 spec:
   predictor:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: gpu
+            operator: In
+            values:
+            - arc-140t
     model:
       runtime: kserve-ovms-intel
       modelFormat:
