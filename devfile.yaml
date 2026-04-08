@@ -13,8 +13,6 @@ components:
     env:
     - name: SHELL
       value: "/bin/zsh"
-    - name: HOME
-      value: "/projects/home"
     - name: VSCODE_DEFAULT_WORKSPACE
       value: "$(PROJECT_SOURCE)/workspace.code-workspace"
 - volume:
@@ -25,7 +23,7 @@ components:
     args:
       - '-c'
       - >-
-        mkdir -p /projects/bin && cp /usr/bin/oc /projects/bin/oc && cp /usr/bin/kubectl /projects/bin/kubectl && if [[ -f ${HOME}/.kube/config ]]; then rm ${HOME}/.kube/config; fi
+        mkdir -p /projects/.bin && cp /usr/bin/oc /projects/.bin/oc && cp /usr/bin/kubectl /projects/.bin/kubectl && if [[ -f ${HOME}/.kube/config ]]; then rm ${HOME}/.kube/config; fi
     command:
       - /bin/bash
     image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
