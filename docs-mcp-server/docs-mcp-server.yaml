@@ -1,8 +1,8 @@
-apiVersion: v1                      
-kind: Namespace                 
-metadata:
-  name: docs-mcp-server
----
+# apiVersion: v1                      
+# kind: Namespace                 
+# metadata:
+#   name: docs-mcp-server
+# ---
 kind: Service
 apiVersion: v1
 metadata:
@@ -110,7 +110,7 @@ spec:
         - name: docs-mcp-server
           image: nexus.clg.lab:5002/dev-spaces/docs-mcp-server:latest
           imagePullPolicy: Always
-          args: ["mcp", "--host", "0.0.0.0", "--port", "6280", "--server-url", "http://docs-mcp-server-worker.docs-mcp-server.svc.cluster.local:8080/api"]
+          args: ["mcp", "--host", "0.0.0.0", "--port", "6280", "--server-url", "http://docs-mcp-server-worker.docs-mcp-server.svc.cluster.local:8080/api", "--verbose"]
           ports:
             - containerPort: 6280
               protocol: TCP
@@ -136,7 +136,6 @@ spec:
               cpu: 1000m
               memory: 3072Mi
           terminationMessagePath: /dev/termination-log
-          capabilities: {}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -170,7 +169,7 @@ spec:
         - name: docs-mcp-server-ui
           image: nexus.clg.lab:5002/dev-spaces/docs-mcp-server:latest
           imagePullPolicy: Always
-          args: ["web", "--host", "0.0.0.0", "--port", "6281", "--server-url", "http://docs-mcp-server-worker.docs-mcp-server.svc.cluster.local:8080/api", "--no-logo"]
+          args: ["web", "--host", "0.0.0.0", "--port", "6281", "--server-url", "http://docs-mcp-server-worker.docs-mcp-server.svc.cluster.local:8080/api", "--no-logo", "--verbose"]
           ports:
             - containerPort: 6281
               protocol: TCP
@@ -196,7 +195,6 @@ spec:
               cpu: 1000m
               memory: 3072Mi
           terminationMessagePath: /dev/termination-log
-          capabilities: {}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -230,12 +228,14 @@ spec:
         - name: docs-mcp-server-worker
           image: nexus.clg.lab:5002/dev-spaces/docs-mcp-server:latest
           imagePullPolicy: Always
-          args: ["worker", "--host", "0.0.0.0", "--port", "8080", "--store-path", "/data", "--embedding-model", "openai:OpenVINO/Qwen3-Embedding-0.6B-int8-ov"]
+          args: ["worker", "--host", "0.0.0.0", "--port", "8080", "--store-path", "/data", "--verbose"]
           env:
           - name: OPENAI_API_KEY
             value: NA
           - name: OPENAI_API_BASE
-            value: "http://qwen3-embedding-int8-ov-predictor.clg-inference.svc.cluster.local/v3"
+            value: "http://qwen3-embedding-int8-ov-predictor.clg-inference.svc.cluster.local:8888/v3"
+          - name: DOCS_MCP_EMBEDDING_MODEL
+            value: OpenVINO/Qwen3-Embedding-0.6B-int8-ov
           ports:
             - containerPort: 6280
               protocol: TCP
@@ -264,7 +264,6 @@ spec:
             - name: docs-mcp-server-worker-data
               mountPath: /data
           terminationMessagePath: /dev/termination-log
-          capabilities: {}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

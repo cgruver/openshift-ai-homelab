@@ -254,6 +254,8 @@ spec:
       workbenchNamespace: rhods-notebooks 
 ```
 
+## Create an OCI image for Qwen3 Coder
+
 ```bash
 curl https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/demos/common/export_models/export_model.py -o export_model.py
 pip3 install -r https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/demos/common/export_models/requirements.txt
@@ -270,10 +272,12 @@ USER 65534
 EOF
 ```
 
+### Export Qwen3 Coder to OpenVino IR format
+
 ```bash
 exportModel text_generation --source_model Qwen/Qwen3-Coder-30B-A3B-Instruct --weight-format int4 --config_file_path model-image/models/config_all.json --model_repository_path model-image/models/ --target_device GPU --tool_parser qwen3coder --overwrite_models
 
-curl -L -o model-image/models/Qwen/Qwen3-Coder-30B-A3B-Instruct/1/chat_template.jinja https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/extras/chat_template_examples/chat_template_qwen3coder_instruct.jinja
+curl -L -o model-image/models/Qwen/Qwen3-Coder-30B-A3B-Instruct/chat_template.jinja https://raw.githubusercontent.com/openvinotoolkit/model_server/refs/heads/releases/2025/4/extras/chat_template_examples/chat_template_qwen3coder_instruct.jinja
 ```
 
 ```bash
@@ -281,16 +285,65 @@ podman build -t nexus.clg.lab:5002/openvino/qwen3-coder:latest --squash-all ./mo
 podman push nexus.clg.lab:5002/openvino/qwen3-coder:latest
 ```
 
+### Deploy Qwen3 Coder
+
 ```bash
 oc new-project clg-inference
 oc apply -f qwen3-coder.yaml
-oc apply -f qwen3-embedding.yaml
+
 # expose as HTTP for now.  Need to set up MaaS
 oc expose service qwen3-coder-30b-a3b-instruct-predictor
 oc annotate route qwen3-coder-30b-a3b-instruct-predictor haproxy.router.openshift.io/timeout=600s
 oc expose service qwen3-embedding-int8-ov-predictor
-
 ```
+
+## Deploy Grounded Docs MCP Server
+
+1. Deploy an embedding model
+
+```bash
+mkdir -p model-image/models
+
+cat << EOF > model-image/Containerfile
+FROM registry.access.redhat.com/ubi10/ubi-micro:latest
+COPY --chown=0:0 models /models
+RUN chmod -R a=rX /models
+USER 65534
+EOF
+
+cat << EOF > model-image/models/config_all.json
+{
+    "model_config_list": [
+        {
+            "config": {
+                "name": "OpenVINO/Qwen3-Embedding-0.6B-int8-ov",
+                "base_path": "OpenVINO/Qwen3-Embedding-0.6B-int8-ov"
+            }
+        }
+    ]
+}
+EOF
+
+ovms --pull --model_repository_path ./model-image/models --source_model OpenVINO/Qwen3-Embedding-0.6B-int8-ov --target_device GPU --task embeddings
+
+podman build -t nexus.clg.lab:5002/openvino/qwen3-embedding:latest --squash-all ./model-image
+podman push nexus.clg.lab:5002/openvino/qwen3-embedding:latest
+
+oc apply -f qwen3-embedding.yaml
+```
+
+1. Deploy Grounded Docs MCP Server
+
+```bash
+podman build -t nexus.clg.lab:5002/dev-spaces/docs-mcp-server:latest ./docs-mcp-server
+podman push nexus.clg.lab:5002/dev-spaces/docs-mcp-server:latest
+
+oc new-project docs-mcp-server
+oc apply -f ./docs-mcp-server/docs-mcp-server.yaml
+```
+
+
+## Random Notes
 
 ```bash
 curl http://qwen3-coder-30b-a3b-instruct-predictor-clg-inference.apps.clg-lab.clg.lab/v3/chat/completions -H "Content-Type: application/json" -d '{"model":"Qwen/Qwen3-Coder-30B-A3B-Instruct","messages":[{"role":"system","content":"You are a helpful assistant."},{"role":"user","content":"write a poem about roses"}],"stream":false}' | jq
@@ -300,5 +353,15 @@ curl http://qwen3-coder-30b-a3b-instruct-predictor-clg-inference.apps.clg-lab.cl
 curl http://qwen3-coder-30b-a3b-instruct-predictor-clg-inference.apps.clg-lab.clg.lab/v3/models | jq
 ```
 
+```bash
+curl http://qwen3-embedding-int8-ov-predictor-clg-inference.apps.clg-lab.clg.lab/v3/embeddings -H "Content-Type: application/json" -d '{"model":"OpenVINO/Qwen3-Embedding-0.6B-int8-ov","input":"Hello There"' | jq
+```
 
+```bash
 ovms --pull --model_repository_path ./models --source_model OpenVINO/Qwen3-Embedding-0.6B-int8-ov --target_device GPU --task embeddings
+```
+
+```bash
+curl http://qwen3-embedding-int8-ov-predictor-clg-inference.apps.clg-lab.clg.lab/v3/embeddings -H "Content-Type: application/json" -d "{ \"model\": \"OpenVINO/Qwen3-Embedding-0.6B-int8-ov\", \"input\": \"hello world\"}"
+```
+

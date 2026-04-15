@@ -17,22 +17,16 @@ COPY centos.repo /etc/yum.repos.d/centos.repo
 
 ENV PATH=${PATH}:/usr/local/node/bin
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV HOME=/data
 
-RUN microdnf --disableplugin=subscription-manager install -y epel-release.noarch chromium-headless libXcursor gtk3; \
+RUN microdnf --disableplugin=subscription-manager install -y epel-release.noarch chromium chromium-headless libXcursor gtk3; \
+    mkdir /data ; \
+    chmod -R g=u /data ; \
     npm install -g @arabold/docs-mcp-server ; \
     npm install -g playwright
+    
+
+WORKDIR /data
 
 ENTRYPOINT ["node", "--enable-source-maps", "/usr/local/node/bin/docs-mcp-server"]
-
-
-# RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
-#     mv /tmp/centos-stream-baseos.repo /etc/yum.repos.d/ && \
-#     mv /tmp/centos-stream-appstream.repo /etc/yum.repos.d/ && \
-#     curl -f -o /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official && \
-#     yum install -y chromium-headless --nogpgcheck --setopt=sslverify=false && \
-#     yum clean all && rm -rf /var/cache/yum && \
-#     rm -f /etc/yum.repos.d/centos-stream-*.repo /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
-
-# ENV PATH="/usr/lib64/chromium-browser:${PATH}"
-
-# RUN yum clean all && rm -rf /var/cache/yum
