@@ -1,0 +1,39 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: qwen3-embedding-int8-ov
+  annotations:
+    openshift.io/display-name: qwen3-embedding-int8-ov
+    # security.opendatahub.io/enable-auth: "true"
+    # serving.knative.openshift.io/enablePassthrough: "true"
+    # sidecar.istio.io/inject: "true"
+    # sidecar.istio.io/rewriteAppHTTPProbers: "true"
+spec:
+  predictor:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: gpu
+            operator: In
+            values:
+            - arc-140t
+    model:
+      runtime: kserve-ovms-intel
+      modelFormat:
+        name: openvino_ir
+      storageUri: oci://nexus.clg.lab:5002/openvino/qwen3-embedding:latest
+      args:
+        - --config_path=/mnt/models/config_all.json
+        - --log_level=DEBUG
+        - --port=8001
+        - --rest_port=8888
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "32Gi"
+          gpu.intel.com/i915: "1"
+        limits:
+          cpu: "8"
+          memory: "64Gi"
+          gpu.intel.com/i915: "1"

@@ -284,9 +284,12 @@ podman push nexus.clg.lab:5002/openvino/qwen3-coder:latest
 ```bash
 oc new-project clg-inference
 oc apply -f qwen3-coder.yaml
+oc apply -f qwen3-embedding.yaml
 # expose as HTTP for now.  Need to set up MaaS
 oc expose service qwen3-coder-30b-a3b-instruct-predictor
 oc annotate route qwen3-coder-30b-a3b-instruct-predictor haproxy.router.openshift.io/timeout=600s
+oc expose service qwen3-embedding-int8-ov-predictor
+
 ```
 
 ```bash
@@ -296,3 +299,6 @@ curl http://qwen3-coder-30b-a3b-instruct-predictor-clg-inference.apps.clg-lab.cl
 ```bash
 curl http://qwen3-coder-30b-a3b-instruct-predictor-clg-inference.apps.clg-lab.clg.lab/v3/models | jq
 ```
+
+
+ovms --pull --model_repository_path ./models --source_model OpenVINO/Qwen3-Embedding-0.6B-int8-ov --target_device GPU --task embeddings

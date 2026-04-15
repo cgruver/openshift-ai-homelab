@@ -230,7 +230,12 @@ spec:
         - name: docs-mcp-server-worker
           image: nexus.clg.lab:5002/dev-spaces/docs-mcp-server:latest
           imagePullPolicy: Always
-          args: ["worker", "--host", "0.0.0.0", "--port", "8080", "--store-path", "/data"]
+          args: ["worker", "--host", "0.0.0.0", "--port", "8080", "--store-path", "/data", "--embedding-model", "openai:OpenVINO/Qwen3-Embedding-0.6B-int8-ov"]
+          env:
+          - name: OPENAI_API_KEY
+            value: NA
+          - name: OPENAI_API_BASE
+            value: "http://qwen3-embedding-int8-ov-predictor.clg-inference.svc.cluster.local/v3"
           ports:
             - containerPort: 6280
               protocol: TCP
