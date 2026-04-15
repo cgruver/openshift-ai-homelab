@@ -1,0 +1,38 @@
+FROM registry.access.redhat.com/ubi10-minimal AS builder
+
+ARG NODE_VERSION=v22.22.2
+
+RUN microdnf --disableplugin=subscription-manager install -y curl tar xz ; \
+    set -e ; \
+    TEMP_DIR="$(mktemp -d)" ; \
+    curl -fsSL -o ${TEMP_DIR}/node.tz https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz ; \
+    tar -x --no-auto-compress -f ${TEMP_DIR}/node.tz -C ${TEMP_DIR} ; \
+    mv ${TEMP_DIR}/node-${NODE_VERSION}-linux-x64 /usr/local/node ; \
+    rm -rf "${TEMP_DIR}"
+
+FROM registry.access.redhat.com/ubi10-minimal
+
+COPY --from=builder --chown=0:0 /usr/local/node /usr/local/node
+COPY centos.repo /etc/yum.repos.d/centos.repo
+
+ENV PATH=${PATH}:/usr/local/node/bin
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
+RUN microdnf --disableplugin=subscription-manager install -y epel-release.noarch chromium-headless libXcursor gtk3; \
+    npm install -g @arabold/docs-mcp-server ; \
+    npm install -g playwright
+
+ENTRYPOINT ["node", "--enable-source-maps", "/usr/local/node/bin/docs-mcp-server"]
+
+
+# RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+#     mv /tmp/centos-stream-baseos.repo /etc/yum.repos.d/ && \
+#     mv /tmp/centos-stream-appstream.repo /etc/yum.repos.d/ && \
+#     curl -f -o /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official && \
+#     yum install -y chromium-headless --nogpgcheck --setopt=sslverify=false && \
+#     yum clean all && rm -rf /var/cache/yum && \
+#     rm -f /etc/yum.repos.d/centos-stream-*.repo /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+# ENV PATH="/usr/lib64/chromium-browser:${PATH}"
+
+# RUN yum clean all && rm -rf /var/cache/yum

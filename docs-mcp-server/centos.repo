@@ -1,0 +1,27 @@
+[baseos]
+name=CentOS Stream 10 - BaseOS
+metalink=https://mirrors.centos.org/metalink?repo=centos-baseos-10-stream&arch=x86_64&protocol=https,http
+gpgcheck=0
+repo_gpgcheck=0
+metadata_expire=6h
+countme=1
+enabled=1
+
+[appstream]
+name=CentOS Stream 10 - AppStream
+metalink=https://mirrors.centos.org/metalink?repo=centos-appstream-10-stream&arch=x86_64&protocol=https,http
+gpgcheck=0
+repo_gpgcheck=0
+metadata_expire=6h
+countme=1
+enabled=1
+
+[epel]
+name=Extra Packages for Enterprise Linux
+#baseurl=https://download.example/pub/epel/$releasever${releasever_minor:+z}/Everything/$basearch/
+metalink=https://mirrors.fedoraproject.org/metalink?repo=epel-10&arch=x86_64
+gpgcheck=0
+repo_gpgcheck=0
+metadata_expire=24h
+countme=1
+enabled=1
