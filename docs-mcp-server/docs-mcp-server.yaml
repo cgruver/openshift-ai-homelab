@@ -41,6 +41,23 @@ spec:
 status:
   loadBalancer: {}
 ---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: docs-mcp-server
+  namespace: docs-mcp-server
+spec:
+  to:
+    kind: Service
+    name: docs-mcp-server
+    weight: 100
+  port:
+    targetPort: 6280
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -110,7 +127,7 @@ spec:
         - name: docs-mcp-server
           image: nexus.clg.lab:5002/dev-spaces/docs-mcp-server:latest
           imagePullPolicy: Always
-          args: ["mcp", "--host", "0.0.0.0", "--port", "6280", "--server-url", "http://docs-mcp-server-worker.docs-mcp-server.svc.cluster.local:8080/api", "--verbose"]
+          args: ["mcp", "--host", "0.0.0.0", "--port", "6280", "--protocol", "http", "--no-logo", "--server-url", "http://docs-mcp-server-worker.docs-mcp-server.svc.cluster.local:8080/api", "--verbose"]
           ports:
             - containerPort: 6280
               protocol: TCP
@@ -237,7 +254,7 @@ spec:
           - name: DOCS_MCP_EMBEDDING_MODEL
             value: OpenVINO/Qwen3-Embedding-0.6B-int8-ov
           ports:
-            - containerPort: 6280
+            - containerPort: 8080
               protocol: TCP
           # livenessProbe:
           #   httpGet:
