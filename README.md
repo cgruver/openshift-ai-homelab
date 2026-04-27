@@ -365,3 +365,20 @@ ovms --pull --model_repository_path ./models --source_model OpenVINO/Qwen3-Embed
 curl http://qwen3-embedding-int8-ov-predictor-clg-inference.apps.clg-lab.clg.lab/v3/embeddings -H "Content-Type: application/json" -d "{ \"model\": \"OpenVINO/Qwen3-Embedding-0.6B-int8-ov\", \"input\": \"hello world\"}"
 ```
 
+## Adding multi-arch support for Grace Blackwell Nodes
+
+```bash
+oc get clusterversion/version -o=jsonpath="{.status.conditions[?(.type=='RetrievedUpdates')].status}"
+```
+
+Result should be `true`
+
+```bash
+oc adm upgrade --to-multi-arch
+```
+
+monitor the upgrade
+
+```bash
+oc adm upgrade status
+```
