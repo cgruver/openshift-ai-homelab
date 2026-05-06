@@ -295,7 +295,6 @@ oc apply -f ./inference-services/qwen3-coder.yaml
 # expose as HTTP for now.  Need to set up MaaS
 oc expose service qwen3-coder-30b-a3b-instruct-predictor
 oc annotate route qwen3-coder-30b-a3b-instruct-predictor haproxy.router.openshift.io/timeout=600s
-oc expose service qwen3-embedding-int8-ov-predictor
 ```
 
 ## Deploy Grounded Docs MCP Server

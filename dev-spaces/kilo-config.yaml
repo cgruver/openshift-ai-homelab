@@ -1,0 +1,105 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kilo-code-configmap
+  namespace: devspaces
+  labels:
+    app.kubernetes.io/part-of: che.eclipse.org
+    app.kubernetes.io/component: workspaces-config
+  annotations:
+    controller.devfile.io/mount-as: subpath
+    controller.devfile.io/mount-path: /projects/.config/kilo/
+data:
+  kilo.jsonc: |
+    {
+      "$schema": "https://app.kilo.ai/config.json",
+      "permission": {
+        "bash": "allow"
+      },
+      "mcp": {
+        "docs-mcp-server": {
+          "type": "remote",
+          "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp"
+        }
+      },
+      "enabled_providers": [
+        "asus-gx10",
+        "mac-mini"
+      ],
+      "provider": {
+        "asus-gx10": {
+          "name": "ASUS GX 10",
+          "npm": "@ai-sdk/openai-compatible",
+          "options": {
+            "baseURL": "http://10.11.12.101:8080/v1"
+          },
+          "models": {
+            "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf": {
+              "name": "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+              "limit": {
+                "context": 262144,
+                "output": 262144
+              },
+              "reasoning": true
+            }
+          }
+        },
+        "mac-mini": {
+          "npm": "@ai-sdk/openai-compatible",
+          "name": "Mac Mini",
+          "options": {
+            "baseURL": "http://10.11.12.100:8080/v1"
+          },
+          "models": {
+            "qwen3-coder:30b": {
+              "name": "qwen3-coder:30b",
+              "limit": {
+                "context": 262144,
+                "output": 262144
+              }
+            }
+          }
+        }
+      },
+      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+      "small_model": "mac-mini/qwen3-coder:30b",
+      "agent": {
+        "plan": {
+          "options": {},
+          "permission": {}
+        },
+        "debug": {
+          "options": {},
+          "permission": {}
+        },
+        "orchestrator": {
+          "options": {},
+          "permission": {}
+        },
+        "ask": {
+          "options": {},
+          "permission": {}
+        },
+        "code": {
+          "options": {},
+          "permission": {}
+        }
+      }
+    }
+
+    {
+      "$schema": "https://app.kilo.ai/config.json",
+      "permission": {
+        "bash": "allow"
+      },
+      "mcp": {
+        "docs-mcp-server": {
+          "type": "remote",
+          "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp"
+        }
+      },
+      
+      
+      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+      
+    }

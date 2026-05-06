@@ -3,11 +3,15 @@
   "permission": {
     "bash": "allow"
   },
-  "disabled_providers": [
-    "302ai",
-    "abacus",
-    "abliteration-ai",
-
+  "mcp": {
+    "docs-mcp-server": {
+      "type": "remote",
+      "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp"
+    }
+  },
+  "enabled_providers": [
+    "asus-gx10",
+    "mac-mini"
   ],
   "provider": {
     "asus-gx10": {
@@ -19,36 +23,50 @@
       "models": {
         "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf": {
           "name": "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+          "limit": {
+            "context": 262144,
+            "output": 262144
+          },
           "reasoning": true
+        }
+      }
+    },
+    "mac-mini": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Mac Mini",
+      "options": {
+        "baseURL": "http://10.11.12.100:8080/v1"
+      },
+      "models": {
+        "qwen3-coder:30b": {
+          "name": "qwen3-coder:30b",
+          "limit": {
+            "context": 262144,
+            "output": 262144
+          }
         }
       }
     }
   },
   "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
-  "small_model": "llama.cpp/qwen3-coder:30b",
   "agent": {
     "plan": {
-      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
       "options": {},
       "permission": {}
     },
     "debug": {
-      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
       "options": {},
       "permission": {}
     },
     "orchestrator": {
-      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
       "options": {},
       "permission": {}
     },
     "ask": {
-      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
       "options": {},
       "permission": {}
     },
     "code": {
-      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
       "options": {},
       "permission": {}
     }
