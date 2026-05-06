@@ -86,20 +86,3 @@ data:
         }
       }
     }
-
-    {
-      "$schema": "https://app.kilo.ai/config.json",
-      "permission": {
-        "bash": "allow"
-      },
-      "mcp": {
-        "docs-mcp-server": {
-          "type": "remote",
-          "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp"
-        }
-      },
-      
-      
-      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
-      
-    }
