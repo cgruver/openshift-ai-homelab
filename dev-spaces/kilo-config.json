@@ -1,0 +1,56 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "bash": "allow"
+  },
+  "disabled_providers": [
+    "302ai",
+    "abacus",
+    "abliteration-ai",
+
+  ],
+  "provider": {
+    "asus-gx10": {
+      "name": "ASUS GX 10",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://10.11.12.101:8080/v1"
+      },
+      "models": {
+        "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf": {
+          "name": "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+          "reasoning": true
+        }
+      }
+    }
+  },
+  "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+  "small_model": "llama.cpp/qwen3-coder:30b",
+  "agent": {
+    "plan": {
+      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+      "options": {},
+      "permission": {}
+    },
+    "debug": {
+      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+      "options": {},
+      "permission": {}
+    },
+    "orchestrator": {
+      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+      "options": {},
+      "permission": {}
+    },
+    "ask": {
+      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+      "options": {},
+      "permission": {}
+    },
+    "code": {
+      "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+      "options": {},
+      "permission": {}
+    }
+  }
+}

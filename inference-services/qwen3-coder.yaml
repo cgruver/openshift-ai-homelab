@@ -1,9 +1,10 @@
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
-  name: qwen3-embedding-int8-ov
+  name: qwen3-coder-30b-a3b-instruct
+  namespace: dev-services-inference
   annotations:
-    openshift.io/display-name: qwen3-embedding-int8-ov
+    openshift.io/display-name: qwen3-coder-30b-a3b-instruct
     # security.opendatahub.io/enable-auth: "true"
     # serving.knative.openshift.io/enablePassthrough: "true"
     # sidecar.istio.io/inject: "true"
@@ -11,12 +12,15 @@ metadata:
 spec:
   predictor:
     nodeSelector:
-      gpu: arc-140t
+      # ARC iGPU 155H Chipset
+      # gpu.intel.com/device-id.0300-7d55.present: "true"
+      # ARC 140T 255H Chipset
+      gpu.intel.com/device-id.0300-7d51.present: "true"
     model:
       runtime: kserve-ovms-intel
       modelFormat:
         name: openvino_ir
-      storageUri: oci://nexus.clg.lab:5002/openvino/qwen3-embedding:latest
+      storageUri: oci://nexus.clg.lab:5002/openvino/qwen3-coder:latest
       args:
         - --config_path=/mnt/models/config_all.json
         - --log_level=DEBUG

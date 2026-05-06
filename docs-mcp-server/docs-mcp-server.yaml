@@ -250,7 +250,7 @@ spec:
           - name: OPENAI_API_KEY
             value: NA
           - name: OPENAI_API_BASE
-            value: "http://qwen3-embedding-int8-ov-predictor.clg-inference.svc.cluster.local:8888/v3"
+            value: "http://qwen3-embedding-int8-ov-predictor.dev-services-inference.svc.cluster.local:8888/v3"
           - name: DOCS_MCP_EMBEDDING_MODEL
             value: OpenVINO/Qwen3-Embedding-0.6B-int8-ov
           ports:

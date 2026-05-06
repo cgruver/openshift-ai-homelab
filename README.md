@@ -155,7 +155,7 @@ metadata:
   namespace: redhat-ods-operator 
 spec:
   name: rhods-operator
-  channel: fast-3.x
+  channel: stable-3.3
   # channel: beta
   source: redhat-operators
   sourceNamespace: openshift-marketplace 
@@ -288,8 +288,9 @@ podman push nexus.clg.lab:5002/openvino/qwen3-coder:latest
 ### Deploy Qwen3 Coder
 
 ```bash
-oc new-project clg-inference
-oc apply -f qwen3-coder.yaml
+oc new-project dev-services-inference
+oc apply -f ./inference-services/serving-runtime.yaml
+oc apply -f ./inference-services/qwen3-coder.yaml
 
 # expose as HTTP for now.  Need to set up MaaS
 oc expose service qwen3-coder-30b-a3b-instruct-predictor
@@ -329,7 +330,7 @@ ovms --pull --model_repository_path ./model-image/models --source_model OpenVINO
 podman build -t nexus.clg.lab:5002/openvino/qwen3-embedding:latest --squash-all ./model-image
 podman push nexus.clg.lab:5002/openvino/qwen3-embedding:latest
 
-oc apply -f qwen3-embedding.yaml
+oc apply -f ./inference-services/qwen3-embedding.yaml
 ```
 
 1. Deploy Grounded Docs MCP Server
@@ -346,15 +347,15 @@ oc apply -f ./docs-mcp-server/docs-mcp-server.yaml
 ## Random Notes
 
 ```bash
-curl http://qwen3-coder-30b-a3b-instruct-predictor-clg-inference.apps.clg-lab.clg.lab/v3/chat/completions -H "Content-Type: application/json" -d '{"model":"Qwen/Qwen3-Coder-30B-A3B-Instruct","messages":[{"role":"system","content":"You are a helpful assistant."},{"role":"user","content":"write a poem about roses"}],"stream":false}' | jq
+curl http://qwen3-coder-30b-a3b-instruct-predictor-dev-services-inference.apps.clg-lab.clg.lab/v3/chat/completions -H "Content-Type: application/json" -d '{"model":"Qwen/Qwen3-Coder-30B-A3B-Instruct","messages":[{"role":"system","content":"You are a helpful assistant."},{"role":"user","content":"write a poem about roses"}],"stream":false}' | jq
 ```
 
 ```bash
-curl http://qwen3-coder-30b-a3b-instruct-predictor-clg-inference.apps.clg-lab.clg.lab/v3/models | jq
+curl http://qwen3-coder-30b-a3b-instruct-predictor-dev-services-inference.apps.clg-lab.clg.lab/v3/models | jq
 ```
 
 ```bash
-curl http://qwen3-embedding-int8-ov-predictor-clg-inference.apps.clg-lab.clg.lab/v3/embeddings -H "Content-Type: application/json" -d '{"model":"OpenVINO/Qwen3-Embedding-0.6B-int8-ov","input":"Hello There"' | jq
+curl http://qwen3-embedding-int8-ov-predictor-dev-services-inference.apps.clg-lab.clg.lab/v3/embeddings -H "Content-Type: application/json" -d '{"model":"OpenVINO/Qwen3-Embedding-0.6B-int8-ov","input":"Hello There"' | jq
 ```
 
 ```bash
@@ -362,10 +363,10 @@ ovms --pull --model_repository_path ./models --source_model OpenVINO/Qwen3-Embed
 ```
 
 ```bash
-curl http://qwen3-embedding-int8-ov-predictor-clg-inference.apps.clg-lab.clg.lab/v3/embeddings -H "Content-Type: application/json" -d "{ \"model\": \"OpenVINO/Qwen3-Embedding-0.6B-int8-ov\", \"input\": \"hello world\"}"
+curl http://qwen3-embedding-int8-ov-predictor-dev-services-inference.apps.clg-lab.clg.lab/v3/embeddings -H "Content-Type: application/json" -d "{ \"model\": \"OpenVINO/Qwen3-Embedding-0.6B-int8-ov\", \"input\": \"hello world\"}"
 ```
 
-## Adding multi-arch support for Grace Blackwell Nodes
+## Adding multi-arch support for Grace Blackwell Nodes. WORK_IN_PROGRESS
 
 ```bash
 oc get clusterversion/version -o=jsonpath="{.status.conditions[?(.type=='RetrievedUpdates')].status}"
@@ -381,4 +382,8 @@ monitor the upgrade
 
 ```bash
 oc adm upgrade status
+```
+
+```bash
+./llama.cpp/build/bin/llama-server --model ~/models/Qwen3-Coder-Next-Q5_K_M/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf --host 0.0.0.0 --port 8080 --n-gpu-layers 999 --ctx-size 262144 --jinja  --verbose
 ```
