@@ -21,11 +21,19 @@
         "baseURL": "http://10.11.12.101:8080/v1"
       },
       "models": {
-        "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf": {
-          "name": "Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+        "Qwen3-Coder-Next-Q5_K_M.gguf": {
+          "name": "Qwen3-Coder-Next-Q5_K_M.gguf",
           "limit": {
             "context": 262144,
             "output": 262144
+          },
+          "reasoning": true
+        },
+        "gpt-oss-120b-Q5_K_M.gguf": {
+          "name": "gpt-oss-120b-Q5_K_M.gguf",
+          "limit": {
+            "context": 131072,
+            "output": 131072
           },
           "reasoning": true
         }
@@ -48,7 +56,8 @@
       }
     }
   },
-  "model": "asus-gx10/Qwen3-Coder-Next-Q5_K_M-00001-of-00004.gguf",
+  "model": "gpt-oss-120b-Q5_K_M.gguf",
+  "small_model": "mac-mini/qwen3-coder:30b",
   "agent": {
     "plan": {
       "options": {},
