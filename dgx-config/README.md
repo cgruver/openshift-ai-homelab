@@ -107,7 +107,7 @@ systemctl daemon-reload
 ## Notes for vLLM on DGX
 
 ```bash
-python3 -m venv /usr/local/models/
+python3 -m venv /usr/local/models/vllm
 . /usr/local/models/vllm/bin/activate
 pip install uv
 uv pip install --upgrade vllm --torch-backend auto
