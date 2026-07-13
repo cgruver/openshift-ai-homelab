@@ -107,7 +107,10 @@ systemctl daemon-reload
 ## Notes for vLLM on DGX
 
 ```bash
-python3 -m venv /usr/local/models/vllm
+python3 -m venv /usr/local/models/
+. /usr/local/models/vllm/bin/activate
+pip install uv
+uv pip install --upgrade vllm --torch-backend auto
 ```
 
 ```bash
@@ -152,4 +155,22 @@ EnvironmentFile=/usr/local/models/vllm/vllm.env
 [Install]
 WantedBy=multi-user.target
 EOF
+```
+
+```
+[Unit]
+Description=NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4
+After=network.target
+
+[Service]
+Type=simple
+LimitNOFILE=65536
+ExecStart=/home/cgruver/.venv/bin/vllm serve /usr/local/models/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --served-model-name nemotron-3-super --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.8 --enable-chunked-prefill --enable-prefix-caching --max-num-seqs 4 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --max-model-len 262144 --default-chat-template-kwargs '{"force_nonempty_content": true}' --host 0.0.0.0 --port 8080 --speculative_config '{"method":"mtp","num_speculative_tokens":3,"moe_backend":"flashinfer_cutlass"}'
+ExecStop=kill 
+User=cgruver
+Restart=on-abort
+EnvironmentFile=/usr/local/models/vllm/vllm.env
+
+[Install]
+WantedBy=multi-user.target
 ```
