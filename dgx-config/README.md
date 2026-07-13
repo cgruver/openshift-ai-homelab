@@ -8,7 +8,6 @@ cmake --build build --config Release -j 20
 sudo cmake --install build --prefix /usr/local/llama-cpp
 ```
 
-
 ### Merge GGUF files into one.
 
 ```bash
@@ -107,6 +106,7 @@ systemctl daemon-reload
 ## Notes for vLLM on DGX
 
 ```bash
+apt-get install ffmpeg libavcodec-extra
 python3 -m venv /usr/local/models/vllm
 . /usr/local/models/vllm/bin/activate
 pip install uv
@@ -165,7 +165,7 @@ After=network.target
 [Service]
 Type=simple
 LimitNOFILE=65536
-ExecStart=/home/cgruver/.venv/bin/vllm serve /usr/local/models/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --served-model-name nemotron-3-super --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.8 --enable-chunked-prefill --enable-prefix-caching --max-num-seqs 4 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --max-model-len 262144 --default-chat-template-kwargs '{"force_nonempty_content": true}' --host 0.0.0.0 --port 8080 --speculative_config '{"method":"mtp","num_speculative_tokens":3,"moe_backend":"flashinfer_cutlass"}'
+ExecStart=/home/cgruver/.venv/bin/vllm serve /usr/local/models/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --served-model-name nemotron-3-super --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.8 --enable-chunked-prefill --enable-prefix-caching --max-num-seqs 4 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --max-model-len 262144 --default-chat-template-kwargs '{"force_nonempty_content": true}' --host 0.0.0.0 --port 8080 --speculative_config '{"method":"mtp","num_speculative_tokens":3,"moe_backend":"flashinfer_cutlass"}' --moe-backend flashinfer_b12x
 ExecStop=kill 
 User=cgruver
 Restart=on-abort
@@ -173,4 +173,10 @@ EnvironmentFile=/usr/local/models/vllm/vllm.env
 
 [Install]
 WantedBy=multi-user.target
+```
+
+```
+--moe-backend flashinfer_b12x
+--enable-chunked-prefill
+--max-num-batched-tokens 16384
 ```
