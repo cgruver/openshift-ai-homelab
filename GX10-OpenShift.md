@@ -182,6 +182,80 @@ scp ${WORK_DIR}/boot-artifacts/rootfs root@${INSTALL_HOST_IP}:/usr/local/www/ins
 
 Boot the GX10 with PXE.  After the GX10 writes RHCOS to disk and reboots, you have to interrupt the boot to change the boot priority to the internal disk.
 
+Install the following Operators -
+
+* Cert Manager
+* Node Feature Discovery
+* OpenShift Leader Worker Set
+* Red Hat Connectivity Link
+* Intel Device Plugins
+* OpenShift AI
+
+## Cert Manager
+
+```yaml
+apiVersion: v1                      
+kind: Namespace                 
+metadata:
+  name: cert-manager-operator
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: openshift-cert-manager-operator
+  namespace: cert-manager-operator
+spec:
+  targetNamespaces:
+  - cert-manager-operator
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-cert-manager-operator
+  namespace: cert-manager-operator
+spec:
+  channel: stable-v1
+  name: openshift-cert-manager-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic
+```
+
+## Node Feature Discovery Operator
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-nfd
+  labels:
+    name: openshift-nfd
+    openshift.io/cluster-monitoring: "true"
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  generateName: openshift-nfd-
+  name: openshift-nfd
+  namespace: openshift-nfd
+spec:
+  targetNamespaces:
+  - openshift-nfd
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: nfd
+  namespace: openshift-nfd
+spec:
+  channel: "stable"
+  installPlanApproval: Automatic
+  name: nfd
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+```
+
 ```yaml
 apiVersion: nfd.openshift.io/v1
 kind: NodeFeatureDiscovery
@@ -209,6 +283,46 @@ spec:
             - "12"
           deviceLabelFields:
             - "vendor"
+```
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nvidia-gpu-operator
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: nvidia-gpu-operator-group
+  namespace: nvidia-gpu-operator
+spec:
+  targetNamespaces:
+  - nvidia-gpu-operator
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: gpu-operator-certified
+  namespace: nvidia-gpu-operator
+spec:
+  channel: "v26.3"
+  installPlanApproval: Manual
+  name: gpu-operator-certified
+  source: certified-operators
+  sourceNamespace: openshift-marketplace
+```
+
+```bash
+oc patch $(oc get installplan -n nvidia-gpu-operator -o name) -n nvidia-gpu-operator --type merge --patch '{"spec":{"approved":true }}'
+
+oc get csv -n nvidia-gpu-operator gpu-operator-certified.v22.9.0 -ojsonpath={.metadata.annotations.alm-examples} | jq .[0] > clusterpolicy.json
+```
+
+## Building a driver image
+
+```bash
+git clone https://github.com/NVIDIA/gpu-driver-container.git
 ```
 
 
