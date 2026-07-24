@@ -188,7 +188,7 @@ Install the following Operators -
 * Node Feature Discovery
 * OpenShift Leader Worker Set
 * Red Hat Connectivity Link
-* Intel Device Plugins
+* NVidia GPU Operator
 * OpenShift AI
 
 ## Cert Manager
