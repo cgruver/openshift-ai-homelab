@@ -323,6 +323,11 @@ oc get csv -n nvidia-gpu-operator gpu-operator-certified.v22.9.0 -ojsonpath={.me
 
 ```bash
 git clone https://github.com/NVIDIA/gpu-driver-container.git
+git clone https://github.com/openshift/driver-toolkit.git
+
+cd driver-toolkit
+git checkout release-4.23
+
 ```
 
 
