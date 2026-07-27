@@ -1,0 +1,27 @@
+[appstream]
+name=AlmaLinux 10.2 - AppStream
+baseurl=https://mirror.opensource.iu.edu/almalinux/10.2/AppStream/aarch64/os/
+enabled=1
+gpgcheck=0
+gpgkey=https://mirror.opensource.iu.edu/almalinux/10.2/AppStream/aarch64/os/
+[baseos]
+name=AlmaLinux 10.2 - BaseOS
+enabled=1
+gpgcheck=0
+baseurl=https://mirror.opensource.iu.edu/almalinux/10.2/BaseOS/aarch64/os/
+gpgkey=https://mirror.opensource.iu.edu/almalinux/10.2/BaseOS/aarch64/os/
+[crb]
+name=Code Ready Builder
+enabled=1
+gpgcheck=0
+baseurl=https://mirror.opensource.iu.edu/almalinux/10.2/CRB/aarch64/os/
+[extras]
+name=Extras
+enabled=1
+gpgcheck=0
+baseurl=https://mirror.opensource.iu.edu/almalinux/10.2/extras/aarch64/os/
+[cuda-rhel10-aarch64]
+name=cuda-rhel10-aarch64
+baseurl=https://developer.download.nvidia.com/compute/cuda/repos/rhel10/sbsa
+enabled=1
+gpgcheck=0

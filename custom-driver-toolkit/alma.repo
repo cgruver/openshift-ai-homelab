@@ -1,0 +1,12 @@
+[appstream]
+name=AlmaLinux 10.2 - AppStream
+baseurl=https://mirror.opensource.iu.edu/almalinux/10.2/AppStream/aarch64/os/
+enabled=1
+gpgcheck=1
+gpgkey=https://mirror.opensource.iu.edu/almalinux/10.2/AppStream/aarch64/os/
+[baseos]
+name=AlmaLinux 10.2 - BaseOS
+enabled=1
+gpgcheck=1
+baseurl=https://mirror.opensource.iu.edu/almalinux/10.2/BaseOS/aarch64/os/
+gpgkey=https://mirror.opensource.iu.edu/almalinux/10.2/BaseOS/aarch64/os/

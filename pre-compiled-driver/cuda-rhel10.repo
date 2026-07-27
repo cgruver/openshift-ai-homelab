@@ -1,0 +1,6 @@
+[cuda-rhel10-aarch64]
+name=cuda-rhel10-aarch64
+baseurl=https://developer.download.nvidia.com/compute/cuda/repos/rhel10/sbsa
+enabled=1
+gpgcheck=1
+gpgkey=https://developer.download.nvidia.com/compute/cuda/repos/rhel10/x86_64/CDF6BA43.pub

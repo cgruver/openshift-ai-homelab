@@ -323,10 +323,50 @@ oc get csv -n nvidia-gpu-operator gpu-operator-certified.v22.9.0 -ojsonpath={.me
 
 ```bash
 git clone https://github.com/NVIDIA/gpu-driver-container.git
-git clone https://github.com/openshift/driver-toolkit.git
 
-cd driver-toolkit
-git checkout release-4.23
+export OPENSHIFT_VERSION="4.22.5"
+export TARGET_ARCH="aarch64"
+export KERNEL_VERSION=6.12.0-211.28.1.el10_2
+export RHEL_VERSION=10.2
+export RHEL_MAJOR=10
+export DRIVER_TOOLKIT_IMAGE=nexus.clg.lab:5002/rhcos/driver-toolkit-rhel10:latest
+export CUDA_VERSION=13.0.2
+export CUDA_DIST=ubi${RHEL_MAJOR}
+export DRIVER_EPOCH=1
+export DRIVER_VERSION=580.159.03
+export OS_TAG=rhcos4.22
+
+podman build -f Containerfile -t ${DRIVER_TOOLKIT_IMAGE} --build-arg KERNEL_VERSION=${KERNEL_VERSION} --build-arg RHEL_VERSION=${RHEL_VERSION} --security-opt label=disable
+
+make image image-push
+
+
+&& ${CONTAINER_TOOL} build \
+		$${BUILD_CMD_ADD_ARGS} \
+		--secret id=RHSM_ORG,src=${RHSM_ORG_FILE} \
+		--secret id=RHSM_ACTIVATIONKEY,src=${RHSM_ACTIVATIONKEY_FILE} \
+		--build-arg RHEL_VERSION=${RHEL_VERSION} \
+		--build-arg RHEL_VERSION_MAJOR=${RHEL_VERSION_MAJOR} \
+		--build-arg CUDA_VERSION=${CUDA_VERSION} \
+		--build-arg CUDA_DIST=${CUDA_DIST} \
+		--build-arg BUILD_ARCH=${BUILD_ARCH} \
+		--build-arg TARGET_ARCH=${TARGET_ARCH} \
+		--build-arg KERNEL_VERSION=${KERNEL_VERSION} \
+		--build-arg KERNEL_VERSION_NOARCH=${KERNEL_VERSION_NOARCH} \
+		--build-arg DRIVER_VERSION=${DRIVER_VERSION} \
+		--build-arg DRIVER_EPOCH=${DRIVER_EPOCH} \
+		--build-arg BUILDER_USER="${BUILDER_USER}" \
+		--build-arg BUILDER_EMAIL=${BUILDER_EMAIL} \
+		--build-arg DRIVER_TOOLKIT_IMAGE=${DRIVER_TOOLKIT_IMAGE} \
+		--build-arg DRIVER_OPEN=${DRIVER_OPEN} \
+        --build-arg DRIVER_TYPE=${DRIVER_TYPE} \
+		--build-arg DRIVER_STREAM_TYPE=${DRIVER_STREAM_TYPE} \
+		--build-arg BASE_URL=${BASE_URL} \
+		--build-arg OS_TAG=${OS_TAG} \
+		--build-arg GIT_COMMIT=${GIT_COMMIT} \
+		--tag ${IMAGE_REGISTRY}/${IMAGE_NAME}:${DRIVER_VERSION}-${KERNEL_VERSION_TAG}-${OS_TAG} \
+		--progress=plain \
+		--file ${DOCKERFILE} .
 
 ```
 
