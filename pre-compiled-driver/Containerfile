@@ -30,8 +30,8 @@ WORKDIR /home/builder
 COPY --chown=1001:0 x509-configuration.ini private_key.priv* public_key.der* /home/builder/
 
 RUN export KVER=$(echo ${KERNEL_VERSION} | cut -d '-' -f 1) \
-        KREL=$(echo ${KERNEL_VERSION} | cut -d '-' -f 2 | sed 's/\.el._.\..\+$//') \
-        KDIST=$(echo ${KERNEL_VERSION} | cut -d '-' -f 2 | sed 's/^.*\(\.el._.\)\..\+$/\1/') \
+        KREL=$(echo ${KERNEL_VERSION} | cut -d '-' -f 2 | sed 's/\.el10_.\..\+$//') \
+        KDIST=$(echo ${KERNEL_VERSION} | cut -d '-' -f 2 | sed 's/^.*\(\.el10_.\)\..\+$/\1/') \
         DRIVER_STREAM=$(echo ${DRIVER_VERSION} | cut -d '.' -f 1) \
     && if [ "${DRIVER_OPEN}" == "true" ] ; then export DRIVER_PATH="${DRIVER_PATH}-open" ; fi \
     && git clone --depth 1 --single-branch -b rhel${RHEL_VERSION_MAJOR} https://github.com/NVIDIA/yum-packaging-precompiled-kmod \
@@ -165,13 +165,6 @@ RUN export DRIVER_STREAM=$(echo ${DRIVER_VERSION} | cut -d '.' -f 1) \
         && dnf clean all \
         && subscription-manager unregister ; \
     fi
-
-ARG CVE_UPDATES
-RUN if [ -n "${CVE_UPDATES}" ]; then \
-        dnf update -y ${CVE_UPDATES}; \
-    fi \
-    && dnf clean all \
-    && rm /usr/local/bin/rhsm-register
 
 LABEL io.k8s.display-name="NVIDIA Driver Container"
 LABEL name="NVIDIA Driver Container"

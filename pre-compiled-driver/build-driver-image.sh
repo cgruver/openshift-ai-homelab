@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CUDA_VERSION=${CUDA_VERSION:-13.0.2}
+CUDA_VERSION=${CUDA_VERSION:-13.3.0}
 DRIVER_VERSION=${DRIVER_VERSION:-580.159.03}
 
 . /etc/os-release
@@ -23,8 +23,8 @@ DRIVER_STREAM_TYPE=''
 
 IMAGE_REGISTRY=${IMAGE_REGISTRY:-local}
 IMAGE_NAME=driver
-BUILDER_USER=$(git config --get user.name)
-BUILDER_EMAIL=$(git config --get user.email)
+BUILDER_USER=gx-10
+BUILDER_EMAIL=gx-10@nowhere.org
 
 podman build \
 	--build-arg RHEL_VERSION=${RHEL_VERSION} \
