@@ -1,3 +1,20 @@
+# Upgrade OS
+
+```bash
+apt update
+apt dist-upgrade
+fwupdmgr refresh --force
+fwupdmgr upgrade
+reboot
+
+apt install linux-headers-$(uname -r) build-essential
+apt install nvidia-driver-610-open linux-modules-nvidia-610-open-nvidia-hwe-24.04 nvidia-prime-
+apt autoremove
+reboot
+apt install cuda-toolkit-13-3
+apt autoremove
+```
+
 # Notes for Llama.cpp on ASUS GX10
 
 ```bash
@@ -106,9 +123,10 @@ systemctl daemon-reload
 ## Notes for vLLM on DGX
 
 ```bash
-apt-get install ffmpeg libavcodec-extra
+apt-get install ffmpeg libavcodec-extra python3-dev ninja-build
 python3 -m venv /usr/local/models/vllm
 . /usr/local/models/vllm/bin/activate
+
 pip install uv
 uv pip install --upgrade vllm --torch-backend auto
 ```
@@ -133,7 +151,7 @@ vllm serve /usr/local/models/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 \
 cat << EOF > /usr/local/models/vllm/vllm.env
 MAX_JOBS=4
 VIRTUAL_ENV=/usr/local/models/vllm
-PATH=${VIRTUAL_ENV}/bin:${PATH}
+PATH=\${VIRTUAL_ENV}/bin:\${PATH}
 EOF
 ```
 
