@@ -151,12 +151,16 @@ vllm serve /usr/local/models/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 \
 cat << EOF > /usr/local/models/vllm/vllm.env
 MAX_JOBS=4
 VIRTUAL_ENV=/usr/local/models/vllm
-PATH=\${VIRTUAL_ENV}/bin:\${PATH}
+PATH=/usr/local/models/vllm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+# VLLM_NVFP4_GEMM_BACKEND=flashinfer-b12x
+# VLLM_USE_FLASHINFER_MOE_FP16=1
+# VLLM_FP8_MOE_BACKEND=flashinfer_cutlass
+# FLASHINFER_DISABLE_VERSION_CHECK=1
+CUTE_DSL_ARCH=sm_121a
 EOF
 ```
 
 ```bash
-cat << EOF > /etc/systemd/system/nvidia-nemotron-vllm.service
 [Unit]
 Description=NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4
 After=network.target
@@ -164,7 +168,7 @@ After=network.target
 [Service]
 Type=simple
 LimitNOFILE=65536
-ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.8 --enable-chunked-prefill --max-num-seqs 4 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --max-model-len 262144 --host 0.0.0.0 --port 8080
+ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 --served-model-name nemotron-3-super --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.8 --enable-chunked-prefill --enable-prefix-caching --max-num-seqs 4 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --max-model-len 262144 --default-chat-template-kwargs '{"force_nonempty_content": true}' --host 0.0.0.0 --port 8080 
 ExecStop=kill 
 User=cgruver
 Restart=on-abort
@@ -172,7 +176,6 @@ EnvironmentFile=/usr/local/models/vllm/vllm.env
 
 [Install]
 WantedBy=multi-user.target
-EOF
 ```
 
 ```
@@ -197,4 +200,22 @@ WantedBy=multi-user.target
 --moe-backend flashinfer_b12x
 --enable-chunked-prefill
 --max-num-batched-tokens 16384
+```
+
+```bash
+[Unit]
+Description=Laguna-S-2.1-NVFP4
+After=network.target
+
+[Service]
+Type=simple
+LimitNOFILE=65536
+ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/Laguna-S-2.1-NVFP4 --served-model-name laguna-S-2.1 --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.85 --enable-chunked-prefill --enable-prefix-caching --max-num-seqs 32 --enable-auto-tool-choice --trust-remote-code --tool-call-parser poolside_v1 --reasoning-parser poolside_v1 --max-model-len 262144 --default-chat-template-kwargs '{"enable_thinking": true}' --host 0.0.0.0 --port 8080 --override-generation-config '{"temperature":0.7,"top_p":0.95}' 
+ExecStop=kill 
+User=cgruver
+Restart=on-abort
+EnvironmentFile=/usr/local/models/vllm/vllm.env
+
+[Install]
+WantedBy=multi-user.target
 ```

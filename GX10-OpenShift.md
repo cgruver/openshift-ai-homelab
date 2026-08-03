@@ -370,6 +370,9 @@ make image image-push
 
 ```
 
+```
+https://developers.redhat.com/articles/2026/06/23/building-custom-red-hat-enterprise-linux-kernel-nvidia-dgx-spark
+```
 
 ## Not Needed
 
