@@ -202,6 +202,35 @@ WantedBy=multi-user.target
 --max-num-batched-tokens 16384
 ```
 
+## Laguna S 2.1
+
+### July release -
+
+```bash
+[Unit]
+Description=Laguna-S-2.1-NVFP4
+After=network.target
+
+[Service]
+Type=simple
+LimitNOFILE=65536
+ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/Laguna-S-2.1-NVFP4 --served-model-name laguna-S-2.1 --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.85 --enable-chunked-prefill --enable-prefix-caching --max-num-seqs 32 --enable-auto-tool-choice --trust-remote-code --tool-call-parser poolside_v1 --reasoning-parser poolside_v1 --max-model-len 262144 --default-chat-template-kwargs '{"enable_thinking": true}' --host 0.0.0.0 --port 8080 --override-generation-config '{"temperature":0.7,"top_p":0.95}' 
+ExecStop=kill 
+User=cgruver
+Restart=on-abort
+EnvironmentFile=/usr/local/models/vllm/vllm.env
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### August release
+
+```bash
+hf download poolside/Laguna-S-2.1-NVFP4 --local-dir /usr/local/models/Laguna-S-2.1-NVFP4
+hf download poolside/Laguna-S-2.1-DFlash-NVFP4 --local-dir /usr/local/models/Laguna-S-2.1-DFlash-NVFP4
+```
+
 ```bash
 [Unit]
 Description=Laguna-S-2.1-NVFP4
