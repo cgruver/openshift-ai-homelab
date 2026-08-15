@@ -235,6 +235,23 @@ pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu130/
 ```
 
 ```bash
+export CUTE_DSL_ARCH=sm_121a          # arch string for FP4 kernel JIT
+export PATH=/usr/local/cuda/bin:$PATH # nvcc for JIT
+export MAX_JOBS=4                     # cap JIT fan-out; see warning below
+source ~/venvs/vllm025/bin/activate
+
+vllm serve poolside/Laguna-S-2.1-NVFP4 \
+  --speculative-config '{"model":"poolside/Laguna-S-2.1-DFlash-NVFP4","num_speculative_tokens":7}' \
+  --enable-auto-tool-choice \
+  --tool-call-parser poolside_v1 \
+  --reasoning-parser poolside_v1 \
+  --max-num-seqs 32 \
+  --max-model-len 262144 \
+  --gpu-memory-utilization 0.85 \
+  --host 0.0.0.0 --port 8000
+```
+
+```bash
 [Unit]
 Description=Laguna-S-2.1-NVFP4
 After=network.target
@@ -242,7 +259,7 @@ After=network.target
 [Service]
 Type=simple
 LimitNOFILE=65536
-ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/Laguna-S-2.1-NVFP4 --served-model-name laguna-S-2.1 --kv-cache-dtype fp8 --load-format fastsafetensors --gpu-memory-utilization 0.85 --enable-chunked-prefill --enable-prefix-caching --max-num-seqs 32 --enable-auto-tool-choice --trust-remote-code --tool-call-parser poolside_v1 --reasoning-parser poolside_v1 --max-model-len 262144 --default-chat-template-kwargs '{"enable_thinking": true}' --host 0.0.0.0 --port 8080 --override-generation-config '{"temperature":0.7,"top_p":0.95}' 
+ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/Laguna-S-2.1-NVFP4 --host 0.0.0.0 --port 8080 --served-model-name laguna-S-2.1 --gpu-memory-utilization 0.9 --max-num-seqs 32 --enable-auto-tool-choice --tool-call-parser poolside_v1 --reasoning-parser poolside_v1 --max-model-len 262144 --speculative-config '{"model":"/usr/local/models/Laguna-S-2.1-DFlash-NVFP4","num_speculative_tokens":7}' --kv-cache-dtype fp8
 ExecStop=kill 
 User=cgruver
 Restart=on-abort
