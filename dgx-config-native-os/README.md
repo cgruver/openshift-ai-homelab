@@ -229,6 +229,9 @@ WantedBy=multi-user.target
 ```bash
 hf download poolside/Laguna-S-2.1-NVFP4 --local-dir /usr/local/models/Laguna-S-2.1-NVFP4
 hf download poolside/Laguna-S-2.1-DFlash-NVFP4 --local-dir /usr/local/models/Laguna-S-2.1-DFlash-NVFP4
+pip install flashinfer-python 
+pip install flashinfer-cubin --index-url https://flashinfer.ai/whl/
+pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu130/
 ```
 
 ```bash
