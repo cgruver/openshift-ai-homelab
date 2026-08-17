@@ -252,6 +252,15 @@ vllm serve poolside/Laguna-S-2.1-NVFP4 \
 ```
 
 ```bash
+cat << EOF > /usr/local/models/vllm/vllm.env
+MAX_JOBS=4
+VIRTUAL_ENV=/usr/local/models/vllm
+PATH=/usr/local/models/vllm/bin:/usr/local/cuda/bin:/opt/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+CUTE_DSL_ARCH=sm_121a
+EOF
+```
+
+```bash
 [Unit]
 Description=Laguna-S-2.1-NVFP4
 After=network.target
