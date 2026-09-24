@@ -1,7 +1,11 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
   "permission": {
-    "bash": "allow"
+    "bash": "allow",
+    "external_directory": {
+      "*": "ask",
+      "/projects/*": "allow"
+    }
   },
   "mcp": {
     "docs-mcp-server": {
@@ -10,8 +14,7 @@
     }
   },
   "enabled_providers": [
-    "asus-gx10",
-    "mac-mini"
+    "asus-gx10"
   ],
   "provider": {
     "asus-gx10": {
@@ -21,43 +24,26 @@
         "baseURL": "http://10.11.12.101:8080/v1"
       },
       "models": {
-        "Qwen3-Coder-Next-Q5_K_M.gguf": {
-          "name": "Qwen3-Coder-Next-Q5_K_M.gguf",
+        "nemotron-3-super": {
+          "name": "nemotron-3-super",
           "limit": {
             "context": 262144,
             "output": 262144
           },
           "reasoning": true
         },
-        "gpt-oss-120b-Q5_K_M.gguf": {
-          "name": "gpt-oss-120b-Q5_K_M.gguf",
+        "laguna-S-2.1": {
+          "name": "laguna-S-2.1",
           "limit": {
-            "context": 131072,
-            "output": 131072
+            "context": 262144,
+            "output": 262144
           },
           "reasoning": true
         }
       }
-    },
-    "mac-mini": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Mac Mini",
-      "options": {
-        "baseURL": "http://10.11.12.100:8080/v1"
-      },
-      "models": {
-        "qwen3-coder:30b": {
-          "name": "qwen3-coder:30b",
-          "limit": {
-            "context": 262144,
-            "output": 262144
-          }
-        }
-      }
     }
   },
-  "model": "gpt-oss-120b-Q5_K_M.gguf",
-  "small_model": "mac-mini/qwen3-coder:30b",
+  "model": "laguna-S-2.1",
   "agent": {
     "plan": {
       "options": {},
@@ -79,5 +65,7 @@
       "options": {},
       "permission": {}
     }
-  }
+  },
+  "auto_collapse_reasoning": false,
+  "terminal_command_display": "expanded"
 }

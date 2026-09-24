@@ -3,9 +3,9 @@
     "currentApiConfigName": "default",
     "apiConfigs": {
       "default": {
-        "openAiBaseUrl": "http://10.11.12.100:8080/v1",
+        "openAiBaseUrl": "http://10.11.12.101:8080/v1",
         "openAiApiKey": "NA",
-        "openAiModelId": "qwen3-coder:30b",
+        "openAiModelId": "laguna-S-2.1",
         "openAiCustomModelInfo": {
           "maxTokens": -1,
           "contextWindow": 262144,
@@ -32,13 +32,6 @@
       "consecutiveMistakeLimitMigrated": true,
       "todoListEnabledMigrated": true,
       "claudeCodeLegacySettingsMigrated": true
-    }
-  },
-  "mcpServers": {
-    "docs-mcp-server": {
-      "type": "streamable-http",
-      "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp",
-      "disabled": false
     }
   },
   "globalSettings": {
@@ -83,7 +76,7 @@
     "soundVolume": 0.5,
     "maxOpenTabsContext": 20,
     "maxWorkspaceFiles": 200,
-    "showRooIgnoredFiles": false,
+    "showZooIgnoredFiles": false,
     "enableSubfolderRules": false,
     "maxImageFileSize": 5,
     "maxTotalImageSize": 20,
@@ -247,6 +240,7 @@
     "reasoningBlockCollapsed": false,
     "enterBehavior": "send",
     "profileThresholds": {},
-    "hasOpenedModeSelector": true
+    "hasOpenedModeSelector": true,
+    "lastSettingsExportPath": "/projects/zoo-code-settings.json"
   }
 }

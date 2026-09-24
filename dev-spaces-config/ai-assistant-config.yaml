@@ -8,17 +8,119 @@ metadata:
     app.kubernetes.io/component: workspaces-config
   annotations:
     controller.devfile.io/mount-as: subpath
-    controller.devfile.io/mount-path: /projects/.globalconfig
+    controller.devfile.io/mount-path: /globalconfig
 data:
-  roo-code-settings.json: |
+  kilo.jsonc: |-
+    {
+      "$schema": "https://app.kilo.ai/config.json",
+      "permission": {
+        "bash": "allow",
+        "external_directory": {
+          "*": "ask",
+          "/projects/*": "allow"
+        }
+      },
+      "mcp": {
+        "docs-mcp-server": {
+          "type": "remote",
+          "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp"
+        }
+      },
+      "enabled_providers": [
+        "asus-gx10"
+      ],
+      "provider": {
+        "asus-gx10": {
+          "name": "ASUS GX 10",
+          "npm": "@ai-sdk/openai-compatible",
+          "options": {
+            "baseURL": "http://10.11.12.101:8080/v1"
+          },
+          "models": {
+            "nemotron-3-super": {
+              "name": "nemotron-3-super",
+              "limit": {
+                "context": 262144,
+                "output": 262144
+              },
+              "reasoning": true
+            },
+            "laguna-S-2.1": {
+              "name": "laguna-S-2.1",
+              "limit": {
+                "context": 262144,
+                "output": 262144
+              },
+              "reasoning": true
+            }
+          }
+        }
+      },
+      "model": "laguna-S-2.1",
+      "agent": {
+        "plan": {
+          "options": {},
+          "permission": {}
+        },
+        "debug": {
+          "options": {},
+          "permission": {}
+        },
+        "orchestrator": {
+          "options": {},
+          "permission": {}
+        },
+        "ask": {
+          "options": {},
+          "permission": {}
+        },
+        "code": {
+          "options": {},
+          "permission": {}
+        }
+      },
+      "auto_collapse_reasoning": false,
+      "terminal_command_display": "expanded"
+    }
+  opencode.json: |-
+    {
+          "$schema": "https://opencode.ai/config.json",
+          "model": "nemotron-3-super",
+          "provider": {
+            "llama.cpp": {
+              "npm": "@ai-sdk/openai-compatible",
+              "name": "asus-gx10",
+              "options": {
+                "baseURL": "http://10.11.12.101:8080/v1"
+              },
+              "models": {
+                "nemotron-3-super": {
+                  "name": "nemotron-3-super",
+                  "limit": {
+                    "context": 262144,
+                    "output": 262144
+                  },
+                  "laguna-S-2.1": {
+                    "name": "laguna-S-2.1",
+                    "limit": {
+                  "context": 262144,
+                  "output": 262144
+                }
+            }
+                }
+              }
+            }
+          }
+        }
+  zoo-code-settings.json: |-
     {
       "providerProfiles": {
         "currentApiConfigName": "default",
         "apiConfigs": {
           "default": {
-            "openAiBaseUrl": "http://10.11.12.100:8080/v1",
+            "openAiBaseUrl": "http://10.11.12.101:8080/v1",
             "openAiApiKey": "NA",
-            "openAiModelId": "qwen3-coder:30b",
+            "openAiModelId": "laguna-S-2.1",
             "openAiCustomModelInfo": {
               "maxTokens": -1,
               "contextWindow": 262144,
@@ -45,13 +147,6 @@ data:
           "consecutiveMistakeLimitMigrated": true,
           "todoListEnabledMigrated": true,
           "claudeCodeLegacySettingsMigrated": true
-        }
-      },
-      "mcpServers": {
-        "docs-mcp-server": {
-          "type": "streamable-http",
-          "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp",
-          "disabled": false
         }
       },
       "globalSettings": {
@@ -96,7 +191,7 @@ data:
         "soundVolume": 0.5,
         "maxOpenTabsContext": 20,
         "maxWorkspaceFiles": 200,
-        "showRooIgnoredFiles": false,
+        "showZooIgnoredFiles": false,
         "enableSubfolderRules": false,
         "maxImageFileSize": 5,
         "maxTotalImageSize": 20,
@@ -260,36 +355,7 @@ data:
         "reasoningBlockCollapsed": false,
         "enterBehavior": "send",
         "profileThresholds": {},
-        "hasOpenedModeSelector": true
-      }
-    }
-  opencode.json: |
-    {
-      "$schema": "https://opencode.ai/config.json",
-      "model": "llama.cpp/qwen3-coder:30b",
-      "provider": {
-        "llama.cpp": {
-          "npm": "@ai-sdk/openai-compatible",
-          "name": "llama-server",
-          "options": {
-            "baseURL": "http://10.11.12.100:8080/v1"
-          },
-          "models": {
-            "qwen3-coder:30b": {
-              "name": "qwen3-coder:30b",
-              "limit": {
-                "context": 262144,
-                "output": 262144
-              }
-            }
-          }
-        }
-      },
-      "mcp": {
-        "docs-mcp-server": {
-          "type": "remote",
-          "url": "https://docs-mcp-server-docs-mcp-server.apps.clg-lab.clg.lab/mcp",
-          "enabled": true
-        }
+        "hasOpenedModeSelector": true,
+        "lastSettingsExportPath": "/projects/zoo-code-settings.json"
       }
     }
