@@ -20,6 +20,8 @@ data:
           "/projects/*": "allow"
         }
       },
+      "auto_collapse_reasoning": false,
+      "terminal_command_display": "expanded",
       "mcp": {
         "docs-mcp-server": {
           "type": "remote",
@@ -34,17 +36,9 @@ data:
           "name": "ASUS GX 10",
           "npm": "@ai-sdk/openai-compatible",
           "options": {
-            "baseURL": "http://10.11.12.101:8080/v1"
+            "baseURL": "http://192.168.12.101:8080/v1"
           },
           "models": {
-            "nemotron-3-super": {
-              "name": "nemotron-3-super",
-              "limit": {
-                "context": 262144,
-                "output": 262144
-              },
-              "reasoning": true
-            },
             "laguna-S-2.1": {
               "name": "laguna-S-2.1",
               "limit": {
@@ -78,9 +72,7 @@ data:
           "options": {},
           "permission": {}
         }
-      },
-      "auto_collapse_reasoning": false,
-      "terminal_command_display": "expanded"
+      }
     }
   opencode.json: |-
     {
@@ -91,15 +83,9 @@ data:
               "npm": "@ai-sdk/openai-compatible",
               "name": "asus-gx10",
               "options": {
-                "baseURL": "http://10.11.12.101:8080/v1"
+                "baseURL": "http://192.168.12.101:8080/v1"
               },
               "models": {
-                "nemotron-3-super": {
-                  "name": "nemotron-3-super",
-                  "limit": {
-                    "context": 262144,
-                    "output": 262144
-                  },
                   "laguna-S-2.1": {
                     "name": "laguna-S-2.1",
                     "limit": {
@@ -118,7 +104,7 @@ data:
         "currentApiConfigName": "default",
         "apiConfigs": {
           "default": {
-            "openAiBaseUrl": "http://10.11.12.101:8080/v1",
+            "openAiBaseUrl": "http://192.168.12.101:8080/v1",
             "openAiApiKey": "NA",
             "openAiModelId": "laguna-S-2.1",
             "openAiCustomModelInfo": {
@@ -355,7 +341,6 @@ data:
         "reasoningBlockCollapsed": false,
         "enterBehavior": "send",
         "profileThresholds": {},
-        "hasOpenedModeSelector": true,
-        "lastSettingsExportPath": "/projects/zoo-code-settings.json"
+        "hasOpenedModeSelector": true
       }
     }
