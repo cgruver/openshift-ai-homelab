@@ -21,7 +21,8 @@ data:
         }
       },
       "auto_collapse_reasoning": false,
-      "terminal_command_display": "expanded",
+      "terminal_command_display": "expanded","code_edit_display": "collapsed",
+      "mcp_tool_display": "collapsed",
       "mcp": {
         "docs-mcp-server": {
           "type": "remote",
