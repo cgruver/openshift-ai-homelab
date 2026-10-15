@@ -8,11 +8,16 @@ fwupdmgr upgrade
 reboot
 
 apt install linux-headers-$(uname -r) build-essential
-apt install nvidia-driver-610-open linux-modules-nvidia-610-open-nvidia-hwe-24.04 nvidia-prime-
+apt install nvidia-driver-615-open linux-modules-nvidia-615-open-nvidia-hwe-24.04 nvidia-prime-
 apt autoremove
 reboot
-apt install cuda-toolkit-13-3
+apt install cuda-toolkit-13-4
 apt autoremove
+```
+
+Put the DGX in headless mode
+```bash
+systemctl set-default multi-user.target
 ```
 
 # Notes for Llama.cpp on ASUS GX10
@@ -229,9 +234,9 @@ WantedBy=multi-user.target
 ```bash
 hf download poolside/Laguna-S-2.1-NVFP4 --local-dir /usr/local/models/Laguna-S-2.1-NVFP4
 hf download poolside/Laguna-S-2.1-DFlash-NVFP4 --local-dir /usr/local/models/Laguna-S-2.1-DFlash-NVFP4
-pip install flashinfer-python 
-pip install flashinfer-cubin --index-url https://flashinfer.ai/whl/
-pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu130/
+#pip install flashinfer-python 
+#pip install flashinfer-cubin --index-url https://flashinfer.ai/whl/
+pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu134/
 ```
 
 ```bash

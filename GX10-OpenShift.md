@@ -1,6 +1,6 @@
 # Adding an ASUS GX10 to OpenShift as a compute node
 
-## Start with an OCP 4.22 cluster
+## Start with an OCP 5.0 cluster
 
 Upgrade the cluster to support multiple cpu architectures -
 
@@ -9,8 +9,6 @@ oc adm upgrade --to-multi-arch
 ```
 
 Modify the cluster to run RHCOS based on RHEL 10
-
-__Note:__ This will render the cluster unable to upgrade beyond 4.22.  The cluster must be disposable.
 
 ```bash
 oc patch FeatureGate cluster --type merge --patch '{"spec":{"featureSet":"CustomNoUpgrade","customNoUpgrade":{"enabled":["OSStreams"]}}}'
@@ -24,7 +22,7 @@ oc patch mcp master --type merge -p '{"spec":{"osImageStream":{"name":"rhel-10"}
 ```bash
 cat << EOF | butane | oc apply -f -
 variant: openshift
-version: 4.22.0
+version: 5.0.0
 metadata:
   labels:
     machineconfiguration.openshift.io/role: master
@@ -46,7 +44,7 @@ EOF
 ```bash
 cat << EOF | butane | oc apply -f -
 variant: openshift
-version: 4.22.0
+version: 5.0.0
 metadata:
   labels:
     machineconfiguration.openshift.io/role: worker
@@ -67,13 +65,43 @@ EOF
 
 ## Prepare manifests to install OpenShift on the GX10
 
+```yaml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  name: gx10
+spec:
+  machineConfigSelector:
+    matchExpressions:
+      - key: machineconfiguration.openshift.io/role
+        operator: In
+        values:
+          - worker
+          - gx10
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/gx10: ""
+```
+
+```bash
+cat << EOF | oc apply -f -
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: "gx10"
+  name: 99-worker-kerneltype
+spec:
+  kernelType: 64k-pages
+EOF
+```
+
 ```bash
 mac="30:c5:99:3f:a7:e7"
-ip_addr="10.11.12.63"
+ip_addr="192.168.12.83"
 cidr="24"
 host_name="clg-lab-gx10"
 boot_dev="/dev/disk/by-path/pci-0004:01:00.0-nvme-1"
-role="worker"
 
 WORK_DIR=${OPENSHIFT_LAB_PATH}/${CLUSTER_NAME}.${DOMAIN}/gx10
 rm -rf ${WORK_DIR}
@@ -81,7 +109,7 @@ mkdir -p ${WORK_DIR}/ipxe-work-dir/ignition
 mkdir ${WORK_DIR}/dns-work-dir
 mkdir ${WORK_DIR}/boot-artifacts
 
-oc extract -n openshift-machine-api secret/worker-user-data --keys=userData --to=- > ${WORK_DIR}/ipxe-work-dir/worker.ign
+oc extract -n openshift-machine-api secret/gx10-user-data-managed --keys=userData --to=- > ${WORK_DIR}/ipxe-work-dir/gx10.ign
 
 cat << EOF > ${WORK_DIR}/ipxe-work-dir/${mac//:/-}-config.yml
 variant: ${BUTANE_VARIANT}
@@ -89,7 +117,7 @@ version: ${BUTANE_SPEC_VERSION}
 ignition:
   config:
     merge:
-      - local: ${role}.ign
+      - local: gx10.ign
 EOF
 cat << EOF >> ${WORK_DIR}/ipxe-work-dir/${mac//:/-}-config.yml
 storage:
@@ -178,6 +206,29 @@ ssh root@${INSTALL_HOST_IP} "mkdir -p /usr/local/www/install/fcos/ignition/${CLU
 scp ${WORK_DIR}/boot-artifacts/initramfs root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/initrd
 scp ${WORK_DIR}/boot-artifacts/kernel root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/vmlinuz
 scp ${WORK_DIR}/boot-artifacts/rootfs root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/rootfs.img
+```
+
+## OpenWRT config
+
+```bash
+uci set dhcp.efi64_boot_3=match
+uci set dhcp.efi64_boot_3.networkid='set:arm64'
+uci set dhcp.efi64_boot_3.match='60,PXEClient:Arch:00011'
+uci set dhcp.arm=boot
+uci set dhcp.arm.networkid='set:arm64'
+uci set dhcp.arm.filename='ipxe-aarch64.efi'
+uci set dhcp.arm.serveraddress='192.168.12.1'
+uci set dhcp.arm.servername='pxe'
+uci set dhcp.arm.force='1'
+uci commit
+```
+
+Get the Aarch64 compatible ipxe.efi
+
+```bash
+wget -O /usr/local/tftpboot/ipxe-aarch64.efi http://boot.ipxe.org/arm64-efi/ipxe.efi
+cp /usr/local/tftpboot/boot.ipxe /usr/local/tftpboot/autoexec.ipxe
+/etc/init.d/dnsmasq restart
 ```
 
 Boot the GX10 with PXE.  After the GX10 writes RHCOS to disk and reboots, you have to interrupt the boot to change the boot priority to the internal disk.
