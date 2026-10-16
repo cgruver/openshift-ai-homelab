@@ -6,13 +6,20 @@
 			"eamodio.gitlens",
 			"streetsidesoftware.code-spell-checker",
 			"johnpapa.winteriscoming",
-			"cnshenj.vscode-task-manager"
+			"cnshenj.vscode-task-manager",
+			"kilocode.kilo-code"
 		]
 	},
 	"settings": {
 		"workbench.colorTheme": "Winter is Coming (Light)",
 		"workbench.preferredDarkColorTheme": "Winter is Coming (Dark Blue)",
 		"workbench.preferredLightColorTheme": "Winter is Coming (Light)",
+		"kilo-code.new.autocomplete.enableAutoTrigger": false,
+		"kilo-code.new.autocomplete.enableChatAutocomplete": false,
+		"kilo-code.new.autocomplete.enableSmartInlineTaskKeybinding": false,
+		"kilo-code.new.browserAutomation.enabled": false,
+		"kilo-code.new.browserAutomation.headless": false,
+		"kilo-code.new.browserAutomation.useSystemChrome": false,
 		"editor.wordWrap": "on",
 		"files.autoSave": "off"
 	},
