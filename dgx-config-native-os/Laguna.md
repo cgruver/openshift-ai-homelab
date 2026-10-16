@@ -57,7 +57,7 @@ After=network.target
 [Service]
 Type=simple
 LimitNOFILE=65536
-ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/Laguna-S-2.1-NVFP4 --host 0.0.0.0 --port 8080 --served-model-name laguna-S-2.1 --gpu-memory-utilization 0.95 --max-num-seqs 32 --enable-auto-tool-choice --tool-call-parser poolside_v1 --reasoning-parser poolside_v1 --max-model-len 262144 --speculative-config '{"model":"/usr/local/models/Laguna-S-2.1-DFlash-NVFP4","num_speculative_tokens":7}' --kv-cache-dtype fp8 --model-loader-extra-config '{"concurrency": 8}'
+ExecStart=/usr/local/models/vllm/bin/vllm serve /usr/local/models/Laguna-S-2.1-NVFP4 --host 0.0.0.0 --port 8080 --served-model-name laguna-S-2.1 --gpu-memory-utilization 0.95 --max-num-seqs 32 --enable-auto-tool-choice --tool-call-parser poolside_v1 --reasoning-parser poolside_v1 --max-model-len 262144 --speculative-config '{"model":"/usr/local/models/Laguna-S-2.1-DFlash-NVFP4","num_speculative_tokens":7}' --kv-cache-dtype fp8 --load-format runai_streamer --model-loader-extra-config '{"concurrency": 8}'
 ExecStop=kill 
 User=vllm
 Restart=on-abort
