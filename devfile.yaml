@@ -15,6 +15,11 @@ components:
       value: "/bin/zsh"
     - name: VSCODE_DEFAULT_WORKSPACE
       value: "$(PROJECT_SOURCE)/workspace.code-workspace"
+    endpoints:
+      - exposure: none
+        name: kilo-code
+        protocol: tcp
+        targetPort: 4096
 - volume:
     size: 100Gi
   name: projects

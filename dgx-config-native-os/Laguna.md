@@ -24,7 +24,7 @@ python3 -m venv /usr/local/models/vllm
 . /usr/local/models/vllm/bin/activate
 pip install uv
 uv pip install --upgrade vllm --torch-backend auto
-pip install flashinfer-python 
+pip install flashinfer-python==0.7.0.post1
 # pip install flashinfer-cubin --index-url https://flashinfer.ai/whl/
 pip install flashinfer-cubin==0.7.0.post1 --index-url https://flashinfer.ai/whl/
 # pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu130/
