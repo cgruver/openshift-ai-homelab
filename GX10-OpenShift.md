@@ -8,13 +8,13 @@ Upgrade the cluster to support multiple cpu architectures -
 oc adm upgrade --to-multi-arch
 ```
 
-Modify the cluster to run RHCOS based on RHEL 10
+Modify the cluster to run RHCOS based on RHEL 10 - Not needed for OCP 5
 
 ```bash
-oc patch FeatureGate cluster --type merge --patch '{"spec":{"featureSet":"CustomNoUpgrade","customNoUpgrade":{"enabled":["OSStreams"]}}}'
-# Wait for the FeatureGate to apply.  Retry the below if they fail.  It takes a bit for the FeatureGate to fully take affect
-oc patch mcp worker --type merge -p '{"spec":{"osImageStream":{"name":"rhel-10"}}}'
-oc patch mcp master --type merge -p '{"spec":{"osImageStream":{"name":"rhel-10"}}}'
+# oc patch FeatureGate cluster --type merge --patch '{"spec":{"featureSet":"CustomNoUpgrade","customNoUpgrade":{"enabled":["OSStreams"]}}}'
+# # Wait for the FeatureGate to apply.  Retry the below if they fail.  It takes a bit for the FeatureGate to fully take affect
+# oc patch mcp worker --type merge -p '{"spec":{"osImageStream":{"name":"rhel-10"}}}'
+# oc patch mcp master --type merge -p '{"spec":{"osImageStream":{"name":"rhel-10"}}}'
 ```
 
 ## Fix QNAP Trident on RHEL 10.2 CoreOS (Specific to my home lab.  I use a QNap NasBook for storage provisioning)
@@ -65,7 +65,8 @@ EOF
 
 ## Prepare manifests to install OpenShift on the GX10
 
-```yaml
+```bash
+cat << EOF | oc apply -f -
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfigPool
 metadata:
@@ -81,6 +82,7 @@ spec:
   nodeSelector:
     matchLabels:
       node-role.kubernetes.io/gx10: ""
+EOF
 ```
 
 ```bash
@@ -90,7 +92,7 @@ kind: MachineConfig
 metadata:
   labels:
     machineconfiguration.openshift.io/role: "gx10"
-  name: 99-worker-kerneltype
+  name: 99-gx10-kerneltype
 spec:
   kernelType: 64k-pages
 EOF
@@ -203,9 +205,9 @@ done
 # coreos-installer pxe customize --dest-karg-append "logo.nologo" --output initramfs.new initramfs
 
 ssh root@${INSTALL_HOST_IP} "mkdir -p /usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10"
-scp ${WORK_DIR}/boot-artifacts/initramfs root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/initrd
-scp ${WORK_DIR}/boot-artifacts/kernel root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/vmlinuz
-scp ${WORK_DIR}/boot-artifacts/rootfs root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/rootfs.img
+scp -O ${WORK_DIR}/boot-artifacts/initramfs root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/initrd
+scp -O ${WORK_DIR}/boot-artifacts/kernel root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/vmlinuz
+scp -O ${WORK_DIR}/boot-artifacts/rootfs root@${INSTALL_HOST_IP}:/usr/local/www/install/fcos/ignition/${CLUSTER_NAME}.${DOMAIN}/gx10/rootfs.img
 ```
 
 ## OpenWRT config
@@ -233,6 +235,13 @@ cp /usr/local/tftpboot/boot.ipxe /usr/local/tftpboot/autoexec.ipxe
 
 Boot the GX10 with PXE.  After the GX10 writes RHCOS to disk and reboots, you have to interrupt the boot to change the boot priority to the internal disk.
 
+Taint the GX10 Node to prevent non-inference related workloads from running:
+
+```bash
+oc adm taint nodes ${host_name} node-type=gpu:NoSchedule
+oc label node ${host_name} node-role.kubernetes.io/gx10=""
+```
+
 Install the following Operators -
 
 * Cert Manager
@@ -244,7 +253,8 @@ Install the following Operators -
 
 ## Cert Manager
 
-```yaml
+```bash
+cat << EOF | oc apply -f -
 apiVersion: v1                      
 kind: Namespace                 
 metadata:
@@ -267,14 +277,16 @@ metadata:
 spec:
   channel: stable-v1
   name: openshift-cert-manager-operator
-  source: redhat-operators
+  source: redhat-operators-4-22
   sourceNamespace: openshift-marketplace
   installPlanApproval: Automatic
+EOF
 ```
 
 ## Node Feature Discovery Operator
 
-```yaml
+```bash
+cat << EOF | oc apply -f -
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -302,12 +314,14 @@ spec:
   channel: "stable"
   installPlanApproval: Automatic
   name: nfd
-  source: redhat-operators
+  source: redhat-operators-4-22
   sourceNamespace: openshift-marketplace
 ---
+EOF
 ```
 
-```yaml
+```bash
+cat << EOF | oc apply -f -
 apiVersion: nfd.openshift.io/v1
 kind: NodeFeatureDiscovery
 metadata:
@@ -319,6 +333,13 @@ spec:
   operand:
     imagePullPolicy: IfNotPresent
     servicePort: 12000
+    workerNodeSelector:
+      node-role.kubernetes.io/gx10: ""
+    workerTolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "gpu"
+      effect: "NoSchedule"
   prunerOnDelete: false
   topologyUpdater: false
   workerConfig:
@@ -334,9 +355,11 @@ spec:
             - "12"
           deviceLabelFields:
             - "vendor"
+EOF
 ```
 
-```yaml
+```bash
+cat << EOF | oc apply -f -
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -357,17 +380,118 @@ metadata:
   name: gpu-operator-certified
   namespace: nvidia-gpu-operator
 spec:
-  channel: "v26.3"
+  channel: "v26.7"
   installPlanApproval: Manual
   name: gpu-operator-certified
-  source: certified-operators
+  source: certified-operators-4-22
   sourceNamespace: openshift-marketplace
+EOF
 ```
 
 ```bash
 oc patch $(oc get installplan -n nvidia-gpu-operator -o name) -n nvidia-gpu-operator --type merge --patch '{"spec":{"approved":true }}'
 
-oc get csv -n nvidia-gpu-operator gpu-operator-certified.v22.9.0 -ojsonpath={.metadata.annotations.alm-examples} | jq .[0] > clusterpolicy.json
+oc get $(oc get csv -n nvidia-gpu-operator -o name) -n nvidia-gpu-operator -ojsonpath={.metadata.annotations.alm-examples} | jq '.[0]' > clusterpolicy.json
+```
+
+image-registry.openshift-image-registry.svc:5000/openshift/driver-toolkit:latest-rhel-10
+
+Create a ClusterPolicy to allow the GPU workloads to run on the GX10
+
+```bash
+cat << EOF | oc apply -f -
+apiVersion: nvidia.com/v1
+kind: ClusterPolicy
+metadata:
+  name: gpu-toleration-cluster-policy
+spec:
+
+  nfd:
+    tolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "gpu"
+      effect: "NoSchedule"
+EOF
+```
+
+```yaml
+kind: ClusterPolicy
+apiVersion: nvidia.com/v1
+metadata:
+  name: gpu-cluster-policy
+spec:
+  daemonsets:
+    updateStrategy: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: '1'
+    tolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "gpu"
+      effect: "NoSchedule"
+  operator:
+    use_ocp_driver_toolkit: true
+  cdi:
+    enabled: true
+    nriPluginEnabled: false
+  sandboxWorkloads:
+    enabled: false
+  driver:
+    enabled: true
+    env:
+    - name: DRIVER_TOOLKIT_IMAGE
+      value: "image-registry.openshift-image-registry.svc:5000/openshift/driver-toolkit:latest-rhel-10"
+    - name: DRIVER_VERSION
+      value: "615.71.09"
+    - name: CUDA_VERSION
+      value: 13.3.3
+    useNvidiaDriverCRD: false
+    kernelModuleType: open
+    upgradePolicy:
+      autoUpgrade: true
+      drain:
+        deleteEmptyDir: false
+        enable: false
+        force: false
+        timeoutSeconds: 300
+      maxParallelUpgrades: 1
+      podDeletion:
+        deleteEmptyDir: false
+        force: false
+        timeoutSeconds: 300
+      waitForCompletion:
+        timeoutSeconds: 0
+  dcgmExporter:
+    enabled: true
+  dcgm:
+    enabled: false
+  devicePlugin:
+    enabled: true
+  gfd:
+    enabled: true
+  migManager:
+    enabled: false
+  nodeStatusExporter:
+    enabled: true
+  toolkit:
+    enabled: true
+  vgpuManager:
+    enabled: false
+  vgpuDeviceManager:
+    enabled: false
+  sandboxDevicePlugin:
+    enabled: false
+  kataSandboxDevicePlugin:
+    enabled: false
+  vfioManager:
+    enabled: false
+  ccManager:
+    enabled: false
+  gds:
+    enabled: false
+  gdrcopy:
+    enabled: false
 ```
 
 ## Building a driver image
@@ -423,6 +547,133 @@ make image image-push
 
 ```
 https://developers.redhat.com/articles/2026/06/23/building-custom-red-hat-enterprise-linux-kernel-nvidia-dgx-spark
+```
+
+## OpenShift AI
+
+```bash
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: redhat-ods-operator 
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: rhods-operator
+  namespace: redhat-ods-operator 
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhods-operator
+  namespace: redhat-ods-operator 
+spec:
+  name: rhods-operator
+  channel: stable-3.3
+  # channel: beta
+  source: redhat-operators-4-22
+  sourceNamespace: openshift-marketplace 
+EOF
+```
+
+```bash
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kuadrant-system
+---
+kind: OperatorGroup
+apiVersion: operators.coreos.com/v1
+metadata:
+  name: kuadrant
+  namespace: kuadrant-system
+spec:
+  upgradeStrategy: Default
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhcl-operator
+  namespace: kuadrant-system
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: rhcl-operator
+  source: redhat-operators-4-22
+  sourceNamespace: openshift-marketplace
+EOF
+```
+
+```bash
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-lws-operator
+---
+kind: OperatorGroup
+apiVersion: operators.coreos.com/v1
+metadata:
+  name: openshift-lws-operator
+  namespace: openshift-lws-operator
+spec:
+  upgradeStrategy: Default
+  targetNamespaces:
+    - openshift-lws-operator
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-lws-operator
+  namespace: openshift-lws-operator
+spec:
+  channel: stable-v1.0
+  installPlanApproval: Automatic
+  name: leader-worker-set
+  source: redhat-operators-4-22
+  sourceNamespace: openshift-marketplace
+EOF
+```
+
+```bash
+cat << EOF | oc apply -f -
+apiVersion: datasciencecluster.opendatahub.io/v2
+kind: DataScienceCluster
+metadata:
+  name: clg-lab-dsc
+spec:
+  components:
+    aipipelines:
+      argoWorkflowsControllers:
+        managementState: Removed 
+      managementState: Removed
+    dashboard:
+      managementState: Removed
+    feastoperator:
+      managementState: Removed
+    kserve:
+      managementState: Managed
+    kueue:
+      defaultClusterQueueName: default
+      defaultLocalQueueName: default
+      managementState: Removed
+    llamastackoperator:
+      managementState: Removed
+    modelregistry:
+      managementState: Removed
+    ray:
+      managementState: Removed
+    trainingoperator:
+      managementState: Removed
+    trustyai:
+      managementState: Removed
+    workbenches:
+      managementState: Removed
+      workbenchNamespace: rhods-notebooks 
+EOF
 ```
 
 ## Not Needed

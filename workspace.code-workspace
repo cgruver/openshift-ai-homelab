@@ -14,6 +14,7 @@
 		"workbench.colorTheme": "Winter is Coming (Light)",
 		"workbench.preferredDarkColorTheme": "Winter is Coming (Dark Blue)",
 		"workbench.preferredLightColorTheme": "Winter is Coming (Light)",
+		"chat.disableAIFeatures": false,
 		"kilo-code.new.autocomplete.enableAutoTrigger": false,
 		"kilo-code.new.autocomplete.enableChatAutocomplete": false,
 		"kilo-code.new.autocomplete.enableSmartInlineTaskKeybinding": false,
